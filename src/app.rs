@@ -86,20 +86,21 @@ impl eframe::App for TemplateApp {
                     ui.button(tr!("toolbar-button-close-all"));
 
                     if home_button.clicked() {
-                        let home_tab = self.tree.iter_all_tabs().find_map(|(_, tab_key)|{
+                        let home_tab = self.tree.iter_all_tabs().find_map(|(surface_and_node, tab_key)|{
                             let tab = self.tabs.get(tab_key).unwrap();
 
                             match tab {
-                                TabKind::Home(_) => Some(tab),
+                                TabKind::Home(_) => Some((tab_key, tab, surface_and_node)),
                                 _ => None,
                             }
                         });
 
-                        if let Some(home_tab) = home_tab {
-                            // nothing to do
+                        if let Some((home_tab, home_tab_key, surface_and_node)) = home_tab {
+                            // focus the existing home tab
+                            self.tree.set_focused_node_and_surface(surface_and_node);
                         } else {
+                            // create a new home tab
                             let home_tab_id = self.tabs.add(TabKind::Home(HomeTab::default()));
-                            // Open the file for editing:
                             self.tree.push_to_focused_leaf(home_tab_id);
                         }
                     }

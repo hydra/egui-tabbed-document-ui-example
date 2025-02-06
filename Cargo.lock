@@ -909,6 +909,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "egui-i18n"
+version = "0.1.0"
+dependencies = [
+ "log",
+ "once_cell",
+]
+
+[[package]]
 name = "egui-wgpu"
 version = "0.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2699,6 +2707,7 @@ version = "0.1.0"
 dependencies = [
  "eframe",
  "egui",
+ "egui-i18n",
  "env_logger",
  "log",
  "serde",

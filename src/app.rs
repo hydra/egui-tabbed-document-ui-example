@@ -1,3 +1,5 @@
+use egui_i18n::tr;
+
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
@@ -53,8 +55,8 @@ impl eframe::App for TemplateApp {
                 // NOTE: no File->Quit on web pages!
                 let is_web = cfg!(target_arch = "wasm32");
                 if !is_web {
-                    ui.menu_button("File", |ui| {
-                        if ui.button("Quit").clicked() {
+                    ui.menu_button(tr!("menu-top-level-file"), |ui| {
+                        if ui.button(tr!("menu-item-quit")).clicked() {
                             ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                         }
                     });
@@ -67,10 +69,10 @@ impl eframe::App for TemplateApp {
             egui::Frame::new()
                 .show(ui, |ui| {
                     ui.horizontal(|ui|{
-                        ui.button("Home");
-                        ui.button("Open");
-                        ui.button("New");
-                        ui.button("Close all");
+                        ui.button(tr!("toolbar-button-home"));
+                        ui.button(tr!("toolbar-button-new"));
+                        ui.button(tr!("toolbar-button-open"));
+                        ui.button(tr!("toolbar-button-close-all"));
                     });
                 });
         });

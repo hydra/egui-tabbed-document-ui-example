@@ -19,6 +19,8 @@ eframe = { version = "0.31.0", default-features = false, features = [
     "persistence",   # Enable restoring app state when restarting the app.
     "wayland",       # To support Linux (and CI)
 ] }
+egui-i18n = { path = "../egui-i18n/i18n" }
+
 log = "0.4.22"
 
 # You only need serde if you want app persistence:

@@ -1,14 +1,17 @@
 use egui_i18n::tr;
+use egui_tabs::Tabs;
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct TemplateApp {
+    tabs: Vec<String>
 }
 
 impl Default for TemplateApp {
     fn default() -> Self {
         Self {
+            tabs: vec!["a".to_string(), "b".to_string(), "c".to_string()]
         }
     }
 }
@@ -70,6 +73,18 @@ impl eframe::App for TemplateApp {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
+
+            if ui.button("add tab").clicked() {
+                self.tabs.push("new".to_string());
+            }
+
+            Tabs::new(self.tabs.len() as i32).show(ui, |ui, state| {
+                let index = state.index() as usize;
+
+                let text = self.tabs[index].clone();
+
+                ui.add(egui::Label::new(text).selectable(false));
+            });
         });
     }
 }

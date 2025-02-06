@@ -20,6 +20,7 @@ eframe = { version = "0.31.0", default-features = false, features = [
     "wayland",       # To support Linux (and CI)
 ] }
 egui-i18n = { path = "../egui-i18n/i18n" }
+egui_dock = { path = "../egui_dock", features = ["serde"]}
 
 log = "0.4.22"
 

@@ -1,14 +1,74 @@
+use std::collections::BTreeMap;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering::SeqCst;
+use egui::{Ui, WidgetText};
+use egui_dock::{DockArea, DockState, Style, TabViewer};
 use egui_i18n::tr;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, Ord, Eq, PartialOrd, PartialEq, Serialize, Deserialize)]
+struct TabId(usize);
+
+impl TabId {
+    pub fn new() -> Self {
+        let id = Self::next_id();
+        Self (id)
+    }
+
+    fn next_id() -> usize {
+        static COUNTER: AtomicUsize = AtomicUsize::new(0);
+        let id = COUNTER.fetch_add(1, SeqCst);
+        id
+    }
+}
+
+#[derive(Default, Serialize, Deserialize)]
+struct Tabs {
+    tabs: BTreeMap<TabId, TabKind>,
+}
+
+impl Tabs {
+    pub fn add(&mut self, tab_kind: TabKind) -> TabId {
+        let id = TabId::new();
+        self.tabs.insert(id, tab_kind);
+
+        id
+    }
+}
+
+impl Tabs {
+    pub fn ids(&self) -> Vec<TabId> {
+        self.tabs.keys().cloned().collect()
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+enum TabKind {
+    Home,
+    Document(String),
+    New,
+}
 
 /// We derive Deserialize/Serialize so we can persist app state on shutdown.
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct TemplateApp {
+    tabs: Tabs,
+    tree: DockState<TabId>,
 }
 
 impl Default for TemplateApp {
     fn default() -> Self {
+        let mut tabs = Tabs::default();
+        let _home_tab_id = tabs.add(TabKind::Home);
+
+        let initial_tab_ids = tabs.ids();
+
+        let tree = DockState::new(initial_tab_ids);
+
         Self {
+            tabs,
+            tree,
         }
     }
 }
@@ -69,7 +129,25 @@ impl eframe::App for TemplateApp {
                 });
         });
 
-        egui::CentralPanel::default().show(ctx, |ui| {
-        });
+        DockArea::new(&mut self.tree)
+            .style(Style::from_egui(ctx.style().as_ref()))
+            .show(ctx, &mut self.tabs);
+    }
+}
+
+impl TabViewer for Tabs {
+    type Tab = TabId;
+
+    fn title(&mut self, tab: &mut Self::Tab) -> WidgetText {
+        let title = format!("{:?}", tab);
+
+        egui::WidgetText::from(&*title)
+    }
+
+    fn ui(&mut self, ui: &mut Ui, tab: &mut Self::Tab) {
+        let _tab_instance = self.tabs.get_mut(tab);
+
+        // TODO delegate to tab kind
+        ui.label(format!("tab: {:?}", tab));
     }
 }

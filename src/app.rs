@@ -63,6 +63,16 @@ impl eframe::App for TemplateApp {
 
                 egui::widgets::global_theme_preference_buttons(ui);
             });
+
+            egui::Frame::new()
+                .show(ui, |ui| {
+                    ui.horizontal(|ui|{
+                        ui.button("Home");
+                        ui.button("Open");
+                        ui.button("New");
+                        ui.button("Close all");
+                    });
+                });
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {

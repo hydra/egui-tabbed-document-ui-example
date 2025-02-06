@@ -1,87 +1,99 @@
-# eframe template
+# Tabbed document UI example
 
-[![dependency status](https://deps.rs/repo/github/emilk/eframe_template/status.svg)](https://deps.rs/repo/github/emilk/eframe_template)
-[![Build Status](https://github.com/emilk/eframe_template/workflows/CI/badge.svg)](https://github.com/emilk/eframe_template/actions?workflow=CI)
+## Requirements
 
-This is a template repo for [eframe](https://github.com/emilk/egui/tree/master/crates/eframe), a framework for writing apps using [egui](https://github.com/emilk/egui/).
-
-The goal is for this to be the simplest way to get started writing a GUI app in Rust.
-
-You can compile your app natively or for the web, and share it using Github Pages.
-
-## Getting started
-
-Start by clicking "Use this template" at https://github.com/emilk/eframe_template/ or follow [these instructions](https://docs.github.com/en/free-pro-team@latest/github/creating-cloning-and-archiving-repositories/creating-a-repository-from-a-template).
-
-Change the name of the crate: Choose a good name for your project, and change the name to it in:
-* `Cargo.toml`
-    * Change the `package.name` from `eframe_template` to `your_crate`.
-    * Change the `package.authors`
-* `main.rs`
-    * Change `eframe_template::TemplateApp` to `your_crate::TemplateApp`
-* `index.html`
-    * Change the `<title>eframe template</title>` to `<title>your_crate</title>`. optional.
-* `assets/sw.js`
-  * Change the `'./eframe_template.js'` to `./your_crate.js` (in `filesToCache` array)
-  * Change the `'./eframe_template_bg.wasm'` to `./your_crate_bg.wasm` (in `filesToCache` array)
-
-Alternatively, you can run `fill_template.sh` which will ask for the needed names and email and perform the above patches for you. This is particularly useful if you clone this repository outside GitHub and hence cannot make use of its
-templating function.
-
-### Learning about egui
-
-`src/app.rs` contains a simple example app. This is just to give some inspiration - most of it can be removed if you like.
-
-The official egui docs are at <https://docs.rs/egui>. If you prefer watching a video introduction, check out <https://www.youtube.com/watch?v=NtUkr_z7l84>. For inspiration, check out the [the egui web demo](https://emilk.github.io/egui/index.html) and follow the links in it to its source code.
-
-### Testing locally
-
-Make sure you are using the latest version of stable rust by running `rustup update`.
-
-`cargo run --release`
-
-On Linux you need to first run:
-
-`sudo apt-get install libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libssl-dev`
-
-On Fedora Rawhide you need to run:
-
-`dnf install clang clang-devel clang-tools-extra libxkbcommon-devel pkg-config openssl-devel libxcb-devel gtk3-devel atk fontconfig-devel`
-
-### Web Locally
-
-You can compile your app to [WASM](https://en.wikipedia.org/wiki/WebAssembly) and publish it as a web page.
-
-We use [Trunk](https://trunkrs.dev/) to build for web target.
-1. Install the required target with `rustup target add wasm32-unknown-unknown`.
-2. Install Trunk with `cargo install --locked trunk`.
-3. Run `trunk serve` to build and serve on `http://127.0.0.1:8080`. Trunk will rebuild automatically if you edit the project.
-4. Open `http://127.0.0.1:8080/index.html#dev` in a browser. See the warning below.
-
-> `assets/sw.js` script will try to cache our app, and loads the cached version when it cannot connect to server allowing your app to work offline (like PWA).
-> appending `#dev` to `index.html` will skip this caching, allowing us to load the latest builds during development.
-
-### Web Deploy
-1. Just run `trunk build --release`.
-2. It will generate a `dist` directory as a "static html" website
-3. Upload the `dist` directory to any of the numerous free hosting websites including [GitHub Pages](https://docs.github.com/en/free-pro-team@latest/github/working-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site).
-4. we already provide a workflow that auto-deploys our app to GitHub pages if you enable it.
-> To enable Github Pages, you need to go to Repository -> Settings -> Pages -> Source -> set to `gh-pages` branch and `/` (root).
->
-> If `gh-pages` is not available in `Source`, just create and push a branch called `gh-pages` and it should be available.
->
-> If you renamed the `main` branch to something else (say you re-initialized the repository with `master` as the initial branch), be sure to edit the github workflows `.github/workflows/pages.yml` file to reflect the change
-> ```yml
-> on:
->   push:
->     branches:
->       - <branch name>
-> ```
-
-You can test the template app at <https://emilk.github.io/eframe_template/>.
-
-## Updating egui
-
-As of 2023, egui is in active development with frequent releases with breaking changes. [eframe_template](https://github.com/emilk/eframe_template/) will be updated in lock-step to always use the latest version of egui.
-
-When updating `egui` and `eframe` it is recommended you do so one version at the time, and read about the changes in [the egui changelog](https://github.com/emilk/egui/blob/master/CHANGELOG.md) and [eframe changelog](https://github.com/emilk/egui/blob/master/crates/eframe/CHANGELOG.md).
+- Main window
+  - [ ] native look and feel title bar with native close, minimize, maximize control
+  - [ ] re-sizable, contents adjust to fit.
+- Toolbar
+  - 'Home' button
+    - [ ] which when clicks shows a home tab.
+    - [ ] if the home tab is already open, it should switch to it.
+  - 'Open' button
+    - [ ] When clicked, shows a native file selector dialog which allows the user to choose a file.
+    - [ ] If an unsupported file is selected, show a native error dialog.
+    - [ ] When a file is opened, a tab appears and depending on the file type, it shows different content in the tab. (e.g. '.txt' text shows the 'Text' tab, '.bmp' shows the 'Image' tab).
+  - 'New' button
+    - [ ] When clicked the 'New' tab is shown, see below.
+  - [ ] Language dropdown, choose between at least 2 languages (e.g. English and Spanish).
+    - [ ] Changing the language should cause all UI text to be immediately displayed in the selected language without requiring a restart.
+- Tab bar
+  - [ ] When all the tabs won't fit in the window, there must be some controls to allow them all to be selected, e.g. `<` and `>` buttons, or `V` dropdown, or scrollable.
+  - [ ] Selecting a tab changes the content area below the tab bar.
+  - [ ] Must be obvious which tab is selected when there are only two tabs.
+  - [ ] Each tab should be closable (e.g. an `X` button on the tab or right-click on tab to show a context menu with `Close`)
+  - [ ] When a tab is closed, the next most recently used tab is made active.
+- Tab content
+  - [ ] Displays the content for the tab.
+  - [ ] Each tab content must maintain it's state, without expensive re-loads/refreshing of the state, no re-loading of files.
+  - [ ] Scroll bars should appear if the content does not fit the window.
+  - Tabs
+    - 'Home' tab
+      - [ ] Shows a welcome message.
+      - [ ] Shows a checkbox with the message 'Open on startup', see 'state items' below.
+    - 'New' tab
+      - [ ] a form is shown with 3 main controls , each with a label, in a grid with labels on the left. Below the form an OK button should be present.
+        - Name - text entry, ideally with placeholder text, no default name.
+        - Type - dropdown, initially nothing selected, choose between Text or Bitmap.
+          - dropdown should always appear, correctly and allow all elements to be chosen even if the window is resized.
+        - Directory - non-editable path with a button to show a native directory selector to be used, that when selected shows the path.
+      - [ ] Title of the new tab is 'New'
+      - [ ] Multiple 'new' tabs are allowed, each with their own state.
+      - Tab state
+        - [ ] The form field values.
+      - When OK is pressed
+        - [ ] the tab name should be updated to the name of the file.
+        - [ ] a file should be created with the appropriate extension.
+        - [ ] it's content should be displayed in the same tab, see tab content below.
+        - [ ] there should be no visible removal and insertion of any new tab.
+        - [ ] tab ordering must be preserved.  e.g. given tabs 'File1, New, File2' pressing 'Ok' on `New` should result in tabs 'File1, File3, File2', not 'File1, File2, File3'
+    - 'Text' tab, displays a 'text' document.
+      - [ ] Filename must appear in tab.
+      - [ ] Show text file content in an editor.
+      - [ ] Content must be loaded in a thread or async, in the background.
+      - Tab State
+        - [ ] Maintain text selection.
+        - [ ] Maintain caret position.
+      - Info sidebar with a grid of key/value items
+        - [ ] File path.
+        - [ ] Length of document.
+        - [ ] Selection information.
+    - 'Image' tab, displays an 'image' document.
+      - [ ] Filename must appear in tab.
+      - [ ] Shows the image.
+      - [ ] Image is top-left justified.
+      - [ ] Image is scaled-up to fit window, aspect ratio must be preserved.
+      - [ ] Do not allow image to be scaled down.
+      - [ ] If too big to fit in the window, scrollbars must be present to allow panning
+      - [ ] Content must be loaded in a thread or async, in the background.
+      - Tab State
+        - [ ] Maintain X/Y coordinates of last click of anywhere on the image.
+      - Info sidebar with a grid of key/value items
+        - [ ] File path.
+        - [ ] Last-clicked X/Y coordinate information.
+        - [ ] Image size. (width, height).
+- Application state must be loaded on program start, and saved as appropriate.
+  - State items
+    - [ ] 'Open home tab on startup', boolean, initially true.
+      - [ ] If true, open the 'Home' tab on startup.
+    - [ ] 'List of currently open files' (ignore `New` tabs), list of absolute filenames, initially empty.
+      - [ ] Create a tab for each file on startup.
+- Documents
+  - 'text' - the text file.
+  - 'image' - the image file.
+- Architecture
+  - [ ] Code should be written in such a way that multiple-developers can work on different aspects of the codebase without creating merge-conflicts. i.e. use modules, avoid tight-coupling, good compile-time dependencies, etc.
+  - [ ] The application itself must own the documents (images, text), not the tabs themselves.
+  - [ ] When the last tab for a document is closed, the document should be dropped/closed.
+- Bonus points
+  - [ ] Native look and feel controls.
+  - [ ] Some way of closing all the tabs in one go (e.g. "Close all" button on toolbar).
+  - [ ] Add 'Display in window' on tab context menu which when clicked displays the document in a new window with no tab bar, and where the window title is the name of the file.
+  - [ ] Multiple tabs for the same document, e.g. right-click a tab, click 'Duplicate'.  Changes in one tab are reflected in the other.
+  - [ ] Status bar, showing some active-tab-specific state, e.g. last click location on image tabs. changes when changing tabs. (e.g. IDEs often show line number, offset, and selected line/character counts in the status bar).
+  - [ ] When two tabs are open, where the file name names of the document are the same, but the directory the file is in is different, show enough of the path to be able to distinguish the two tabs.
+    - e.g. for `/tmp/foobar/file.txt` and `/tmp/barfoo/file.txt` instead of (`file.txt` & `file.txt`) show (`foobar/file.txt` & `barfoo/file.txt`)
+    - doing this forces the tab system to be able to access other tab names and change them all, dynamically, when one tab is added or when one is updated.
+  - [ ] Draggable divider between sidebar and content.
+  - [ ] Tests for individual components.
+  - [ ] Integration/Behavioral tests.

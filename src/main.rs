@@ -18,7 +18,7 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
     eframe::run_native(
-        "eframe template",
+        "Tabbed document UI",
         native_options,
         Box::new(|cc| Ok(Box::new(tabbed_document_ui_example::TemplateApp::new(cc)))),
     )

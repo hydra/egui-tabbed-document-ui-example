@@ -4,34 +4,30 @@ use egui_dock::TabViewer;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering::SeqCst;
 
 #[derive(Debug, Clone, Hash, Copy, Ord, Eq, PartialOrd, PartialEq, Serialize, Deserialize)]
 pub struct TabKey(usize);
 
-impl TabKey {
-    pub fn new() -> Self {
-        let id = Self::next_id();
-        Self(id)
-    }
-
-    fn next_id() -> usize {
-        static COUNTER: AtomicUsize = AtomicUsize::new(0);
-        let id = COUNTER.fetch_add(1, SeqCst);
-        id
-    }
-}
-
 #[derive(Default, Serialize, Deserialize)]
 pub struct Tabs {
+    next_id: usize,
     tabs: BTreeMap<TabKey, TabKind>,
 }
 
 
 impl Tabs {
+    fn next_key(&mut self) -> TabKey {
+        loop {
+            self.next_id = self.next_id.wrapping_add(1);
+            let candidate_id = TabKey(self.next_id);
+            if !self.tabs.contains_key(&candidate_id) {
+                return candidate_id;
+            }
+        }
+    }
+
     pub fn add(&mut self, tab_kind: TabKind) -> TabKey {
-        let id = TabKey::new();
+        let id = self.next_key();
         self.tabs.insert(id, tab_kind);
 
         id

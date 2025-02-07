@@ -47,22 +47,27 @@ impl TemplateApp {
     }
 
     fn show_home_tab(&mut self) {
-        let home_tab = self.tree.iter_all_tabs().find_map(|(surface_and_node, tab_key)| {
-            let tab = self.tabs.get(tab_key).unwrap();
+        let home_tab = self.tree.iter_all_tabs().find_map(|(_surface_and_node, tab_key)| {
+            let tab_kind = self.tabs.get(tab_key).unwrap();
 
-            match tab {
-                TabKind::Home(_) => Some((tab_key, tab, surface_and_node)),
+            match tab_kind {
+                TabKind::Home(_) => {
+                    Some(tab_key)
+                },
                 _ => None,
             }
         });
 
-        if let Some((_home_tab, _home_tab_key, surface_and_node)) = home_tab {
-            // focus the existing home tab
-            self.tree.set_focused_node_and_surface(surface_and_node);
+        if let Some(home_tab_key) = &home_tab {
+            // although we have the tab, we don't know the tab_index, which is required for the call to `set_active_tab`,
+            // so we have to call `find_tab`
+            let find_result = self.tree.find_tab(home_tab_key).unwrap();
+            self.tree.set_active_tab(find_result);
+
         } else {
             // create a new home tab
-            let home_tab_id = self.tabs.add(TabKind::Home(HomeTab::default()));
-            self.tree.push_to_focused_leaf(home_tab_id);
+            let tab_id = self.tabs.add(TabKind::Home(HomeTab::default()));
+            self.tree.push_to_focused_leaf(tab_id);
         }
     }
 

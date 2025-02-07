@@ -40,11 +40,10 @@ impl Tab for NewTab {
             .label(tr!("form-new-name"))
             .ui(ui, TextEdit::singleline(&mut self.fields.name));
 
-
         FormField::new(&mut form, field_path!("kind"))
             .label(tr!("form-new-kind"))
-            .ui(ui, |ui|{
-                let foo = egui::ComboBox::from_label("Kind")
+            .ui(ui,
+                egui::ComboBox::from_label("Kind")
                     .selected_text(match self.fields.kind {
                         None => tr!("form-common-combo-default"),
                         Some(NewDocumentKind::Text) => tr!("form-new-kind-text"),
@@ -57,10 +56,8 @@ impl Tab for NewTab {
                         if ui.add(egui::SelectableLabel::new(self.fields.kind == Some(NewDocumentKind::Text), tr!("form-new-kind-text"))).clicked() {
                             self.fields.kind = Some(NewDocumentKind::Text)
                         }
-                    });
-
-                foo.response
-            });
+                    })
+            );
 
         if let Some(Ok(())) = form.handle_submit(&ui.button("Ok"), ui) {
             println!("Submitted: {:?}", self.fields);

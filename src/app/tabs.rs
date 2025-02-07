@@ -14,7 +14,6 @@ pub struct Tabs {
     tabs: BTreeMap<TabKey, TabKind>,
 }
 
-
 impl Tabs {
     fn next_key(&mut self) -> TabKey {
         loop {

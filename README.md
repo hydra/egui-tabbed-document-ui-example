@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Main window
+~~- Main window
   - [ ] native look and feel title bar with native close, minimize, maximize control
   - [ ] re-sizable, contents adjust to fit.
 - Toolbar
@@ -96,4 +96,4 @@
     - doing this forces the tab system to be able to access other tab names and change them all, dynamically, when one tab is added or when one is updated.
   - [ ] Draggable divider between sidebar and content.
   - [ ] Tests for individual components.
-  - [ ] Integration/Behavioral tests.
+  - [ ] Integration/Behavioral tests.~~

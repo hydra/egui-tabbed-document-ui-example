@@ -8,3 +8,9 @@ menu-item-quit = Quit
 
 home-tab-label = Home
 home-heading = Home
+
+form-new-name = Name
+form-new-kind-image = Image
+form-new-kind-text = Text
+
+form-common-combo-default =

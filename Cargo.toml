@@ -22,6 +22,7 @@ eframe = { version = "0.31.0", default-features = false, features = [
 egui-i18n = { path = "../egui-i18n/i18n" }
 egui_dock = { path = "../egui_dock", features = ["serde"]}
 egui_material_icons = { path = "../hello_egui/crates/egui_material_icons" }
+egui_flex = { path = "../hello_egui/crates/egui_flex" }
 
 log = "0.4.22"
 

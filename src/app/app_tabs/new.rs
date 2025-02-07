@@ -33,17 +33,17 @@ impl Tab for NewTab {
     }
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey) {
-
         let mut form = Form::new().add_report(GardeReport::new(self.fields.validate()));
 
         FormField::new(&mut form, field_path!("name"))
             .label(tr!("form-new-name"))
             .ui(ui, TextEdit::singleline(&mut self.fields.name));
 
+        let kind_id = ui.id();
         FormField::new(&mut form, field_path!("kind"))
             .label(tr!("form-new-kind"))
             .ui(ui, |ui: &mut egui::Ui| {
-                egui::ComboBox::from_label("Kind")
+                egui::ComboBox::from_id_salt(kind_id)
                     .selected_text(match self.fields.kind {
                         None => tr!("form-common-combo-default"),
                         Some(NewDocumentKind::Text) => tr!("form-new-kind-text"),

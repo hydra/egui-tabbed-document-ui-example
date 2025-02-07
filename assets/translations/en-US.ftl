@@ -10,6 +10,7 @@ home-tab-label = Home
 home-heading = Home
 
 form-new-name = Name
+form-new-kind = Kind
 form-new-kind-image = Image
 form-new-kind-text = Text
 

@@ -38,24 +38,5 @@ impl Tab for HomeTab {
                     ui.label(RichText::new("Home").size(48.0));
                 });
             });
-
-        // Without flex, doesn't center the content.
-        /*
-        ui.vertical_centered(|ui|{
-            ui.horizontal(|ui| {
-                egui::frame::Frame::new()
-                    .show(ui, |ui| {
-                        Label::new(
-                            RichText::new(ICON_HOME)
-                                .size(48.0)
-                                .family(FontFamily::Proportional),
-                        )
-                            .ui(ui);
-
-                        ui.label(RichText::new("Home").size(48.0));
-                    });
-            });
-        });
-         */
     }
 }

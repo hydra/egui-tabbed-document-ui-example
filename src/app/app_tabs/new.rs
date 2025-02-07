@@ -42,7 +42,7 @@ impl Tab for NewTab {
 
         FormField::new(&mut form, field_path!("kind"))
             .label(tr!("form-new-kind"))
-            .ui(ui, |ui| {
+            .ui(ui, |ui: &mut egui::Ui| {
                 egui::ComboBox::from_label("Kind")
                     .selected_text(match self.fields.kind {
                         None => tr!("form-common-combo-default"),

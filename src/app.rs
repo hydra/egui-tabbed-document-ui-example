@@ -1,13 +1,8 @@
 use crate::app::app_tabs::home::HomeTab;
 use crate::app::app_tabs::TabKind;
 use crate::app::tabs::{TabKey, Tabs};
-use egui::{Ui, WidgetText};
-use egui_dock::{DockArea, DockState, Style, TabViewer};
+use egui_dock::{DockArea, DockState, Style};
 use egui_i18n::tr;
-use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering::SeqCst;
 use crate::fonts;
 
 mod app_tabs;
@@ -49,6 +44,26 @@ impl TemplateApp {
 
         Default::default()
     }
+
+    fn show_home_tab(&mut self) {
+        let home_tab = self.tree.iter_all_tabs().find_map(|(surface_and_node, tab_key)| {
+            let tab = self.tabs.get(tab_key).unwrap();
+
+            match tab {
+                TabKind::Home(_) => Some((tab_key, tab, surface_and_node)),
+                _ => None,
+            }
+        });
+
+        if let Some((_home_tab, _home_tab_key, surface_and_node)) = home_tab {
+            // focus the existing home tab
+            self.tree.set_focused_node_and_surface(surface_and_node);
+        } else {
+            // create a new home tab
+            let home_tab_id = self.tabs.add(TabKind::Home(HomeTab::default()));
+            self.tree.push_to_focused_leaf(home_tab_id);
+        }
+    }
 }
 
 impl eframe::App for TemplateApp {
@@ -83,28 +98,12 @@ impl eframe::App for TemplateApp {
             egui::Frame::new().show(ui, |ui| {
                 ui.horizontal(|ui| {
                     let home_button = ui.button(tr!("toolbar-button-home"));
-                    ui.button(tr!("toolbar-button-new"));
-                    ui.button(tr!("toolbar-button-open"));
-                    ui.button(tr!("toolbar-button-close-all"));
+                    let _new_button = ui.button(tr!("toolbar-button-new"));
+                    let _open_button = ui.button(tr!("toolbar-button-open"));
+                    let _close_all = ui.button(tr!("toolbar-button-close-all"));
 
                     if home_button.clicked() {
-                        let home_tab = self.tree.iter_all_tabs().find_map(|(surface_and_node, tab_key)|{
-                            let tab = self.tabs.get(tab_key).unwrap();
-
-                            match tab {
-                                TabKind::Home(_) => Some((tab_key, tab, surface_and_node)),
-                                _ => None,
-                            }
-                        });
-
-                        if let Some((home_tab, home_tab_key, surface_and_node)) = home_tab {
-                            // focus the existing home tab
-                            self.tree.set_focused_node_and_surface(surface_and_node);
-                        } else {
-                            // create a new home tab
-                            let home_tab_id = self.tabs.add(TabKind::Home(HomeTab::default()));
-                            self.tree.push_to_focused_leaf(home_tab_id);
-                        }
+                        self.show_home_tab();
                     }
                 });
             });

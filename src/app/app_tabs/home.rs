@@ -1,7 +1,6 @@
-use eframe::Frame;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Direction, FontFamily, Label, RichText, Ui, Widget, WidgetText};
-use egui_flex::{Flex, FlexAlign, FlexAlignContent, FlexItem, FlexJustify};
+use egui::{FontFamily, Label, RichText, Ui, Widget, WidgetText};
+use egui_flex::{Flex, FlexAlign, FlexItem, FlexJustify};
 use egui_material_icons::icons::ICON_HOME;
 use serde::{Deserialize, Serialize};
 

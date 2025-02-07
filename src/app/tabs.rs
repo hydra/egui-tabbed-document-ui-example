@@ -1,6 +1,6 @@
 use crate::app::app_tabs::TabKind;
 use egui::{Id, Ui, WidgetText};
-use egui_dock::{NodeIndex, SurfaceIndex, TabViewer};
+use egui_dock::TabViewer;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;

@@ -1,6 +1,7 @@
 use crate::app::tabs::{Tab, TabKey};
 use egui::{FontFamily, Label, RichText, Ui, Widget, WidgetText};
 use egui_flex::{Flex, FlexAlign, FlexItem, FlexJustify};
+use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use serde::{Deserialize, Serialize};
 
@@ -9,7 +10,7 @@ pub struct HomeTab {}
 
 impl Tab for HomeTab {
     fn label(&self) -> WidgetText {
-        egui::widget_text::WidgetText::from("Home")
+        egui::widget_text::WidgetText::from(tr!("home-tab-label"))
     }
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey) {
@@ -34,7 +35,7 @@ impl Tab for HomeTab {
                     )
                         .ui(ui);
 
-                    ui.label(RichText::new("Home").size(48.0));
+                    ui.label(RichText::new(tr!("home-heading")).size(48.0));
                 });
             });
     }

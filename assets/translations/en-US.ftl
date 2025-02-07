@@ -5,3 +5,6 @@ toolbar-button-close-all = Close
 
 menu-top-level-file = File
 menu-item-quit = Quit
+
+home-tab-label = Home
+home-heading = Home

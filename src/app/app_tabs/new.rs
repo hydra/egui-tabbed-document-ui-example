@@ -1,14 +1,14 @@
 use crate::app::tabs::{Tab, TabKey};
 use egui::{TextEdit, Ui, WidgetText};
-use egui_form::{Form, FormField};
 use egui_form::garde::{field_path, GardeReport};
+use egui_form::{Form, FormField};
 use egui_i18n::tr;
-use serde::{Deserialize, Serialize};
 use garde::Validate;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
 pub struct NewTab {
-    fields: NewTabForm
+    fields: NewTabForm,
 }
 
 // FIXME form errors do not use i18n
@@ -50,13 +50,26 @@ impl Tab for NewTab {
                         Some(NewDocumentKind::Image) => tr!("form-new-kind-image"),
                     })
                     .show_ui(ui, |ui| {
-                        if ui.add(egui::SelectableLabel::new(self.fields.kind == Some(NewDocumentKind::Image), tr!("form-new-kind-image"))).clicked() {
+                        if ui
+                            .add(egui::SelectableLabel::new(
+                                self.fields.kind == Some(NewDocumentKind::Image),
+                                tr!("form-new-kind-image"),
+                            ))
+                            .clicked()
+                        {
                             self.fields.kind = Some(NewDocumentKind::Image)
                         }
-                        if ui.add(egui::SelectableLabel::new(self.fields.kind == Some(NewDocumentKind::Text), tr!("form-new-kind-text"))).clicked() {
+                        if ui
+                            .add(egui::SelectableLabel::new(
+                                self.fields.kind == Some(NewDocumentKind::Text),
+                                tr!("form-new-kind-text"),
+                            ))
+                            .clicked()
+                        {
                             self.fields.kind = Some(NewDocumentKind::Text)
                         }
-                    }).response
+                    })
+                    .response
             });
 
         if let Some(Ok(())) = form.handle_submit(&ui.button("Ok"), ui) {

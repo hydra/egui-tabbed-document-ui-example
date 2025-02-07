@@ -21,22 +21,22 @@ impl Tab for HomeTab {
             .h_full()
             .w_full()
             .show(ui, |flex| {
-
                 flex.add_ui(
                     FlexItem::new()
                         // causes the box of the frame to shrink to the content
                         .align_self(FlexAlign::Center)
-                        .frame(frame), |ui|
-                {
-                    Label::new(
-                        RichText::new(ICON_HOME)
-                            .size(48.0)
-                            .family(FontFamily::Proportional),
-                    )
+                        .frame(frame),
+                    |ui| {
+                        Label::new(
+                            RichText::new(ICON_HOME)
+                                .size(48.0)
+                                .family(FontFamily::Proportional),
+                        )
                         .ui(ui);
 
-                    ui.label(RichText::new(tr!("home-heading")).size(48.0));
-                });
+                        ui.label(RichText::new(tr!("home-heading")).size(48.0));
+                    },
+                );
             });
     }
 }

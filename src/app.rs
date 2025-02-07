@@ -1,10 +1,10 @@
 use crate::app::app_tabs::home::HomeTab;
+use crate::app::app_tabs::new::NewTab;
 use crate::app::app_tabs::TabKind;
 use crate::app::tabs::{TabKey, Tabs};
+use crate::fonts;
 use egui_dock::{DockArea, DockState, Style};
 use egui_i18n::tr;
-use crate::app::app_tabs::new::NewTab;
-use crate::fonts;
 
 mod app_tabs;
 mod tabs;
@@ -47,23 +47,23 @@ impl TemplateApp {
     }
 
     fn show_home_tab(&mut self) {
-        let home_tab = self.tree.iter_all_tabs().find_map(|(_surface_and_node, tab_key)| {
-            let tab_kind = self.tabs.get(tab_key).unwrap();
+        let home_tab = self
+            .tree
+            .iter_all_tabs()
+            .find_map(|(_surface_and_node, tab_key)| {
+                let tab_kind = self.tabs.get(tab_key).unwrap();
 
-            match tab_kind {
-                TabKind::Home(_) => {
-                    Some(tab_key)
-                },
-                _ => None,
-            }
-        });
+                match tab_kind {
+                    TabKind::Home(_) => Some(tab_key),
+                    _ => None,
+                }
+            });
 
         if let Some(home_tab_key) = &home_tab {
             // although we have the tab, we don't know the tab_index, which is required for the call to `set_active_tab`,
             // so we have to call `find_tab`
             let find_result = self.tree.find_tab(home_tab_key).unwrap();
             self.tree.set_active_tab(find_result);
-
         } else {
             // create a new home tab
             let tab_id = self.tabs.add(TabKind::Home(HomeTab::default()));

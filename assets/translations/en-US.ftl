@@ -14,4 +14,7 @@ form-new-kind = Kind
 form-new-kind-image = Image
 form-new-kind-text = Text
 
+form-common-button-ok = Ok
+form-common-button-cancel = Cancel
+
 form-common-combo-default =

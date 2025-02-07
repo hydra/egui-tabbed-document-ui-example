@@ -72,8 +72,14 @@ impl Tab for NewTab {
                     .response
             });
 
-        if let Some(Ok(())) = form.handle_submit(&ui.button("Ok"), ui) {
-            println!("Submitted: {:?}", self.fields);
+        if let Some(Ok(())) = form.handle_submit(&ui.button(tr!("form-common-button-ok")), ui) {
+            self.on_submit();
         }
+    }
+}
+
+impl NewTab {
+    fn on_submit(&mut self) {
+        println!("Submitted: {:?}", self.fields);
     }
 }

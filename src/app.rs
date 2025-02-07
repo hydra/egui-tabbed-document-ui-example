@@ -3,6 +3,7 @@ use crate::app::app_tabs::TabKind;
 use crate::app::tabs::{TabKey, Tabs};
 use egui_dock::{DockArea, DockState, Style};
 use egui_i18n::tr;
+use crate::app::app_tabs::new::NewTab;
 use crate::fonts;
 
 mod app_tabs;
@@ -64,6 +65,12 @@ impl TemplateApp {
             self.tree.push_to_focused_leaf(home_tab_id);
         }
     }
+
+    fn add_new_tab(&mut self) {
+        // create a new 'new' tab
+        let tab_id = self.tabs.add(TabKind::New(NewTab::default()));
+        self.tree.push_to_focused_leaf(tab_id);
+    }
 }
 
 impl eframe::App for TemplateApp {
@@ -98,12 +105,16 @@ impl eframe::App for TemplateApp {
             egui::Frame::new().show(ui, |ui| {
                 ui.horizontal(|ui| {
                     let home_button = ui.button(tr!("toolbar-button-home"));
-                    let _new_button = ui.button(tr!("toolbar-button-new"));
+                    let new_button = ui.button(tr!("toolbar-button-new"));
                     let _open_button = ui.button(tr!("toolbar-button-open"));
                     let _close_all = ui.button(tr!("toolbar-button-close-all"));
 
                     if home_button.clicked() {
                         self.show_home_tab();
+                    }
+
+                    if new_button.clicked() {
+                        self.add_new_tab();
                     }
                 });
             });

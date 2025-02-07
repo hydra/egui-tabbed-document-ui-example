@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
 use tabbed_document_ui_example::i18n;
+use tabbed_document_ui_example::fonts;
 
 // When compiling natively:
 #[cfg(not(target_arch = "wasm32"))]

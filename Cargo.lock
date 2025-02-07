@@ -997,6 +997,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "egui_material_icons"
+version = "0.2.0"
+dependencies = [
+ "egui",
+]
+
+[[package]]
 name = "emath"
 version = "0.31.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2743,6 +2750,7 @@ dependencies = [
  "egui",
  "egui-i18n",
  "egui_dock",
+ "egui_material_icons",
  "env_logger",
  "log",
  "serde",

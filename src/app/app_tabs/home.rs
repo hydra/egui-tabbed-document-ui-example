@@ -1,5 +1,6 @@
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Ui, WidgetText};
+use egui::{FontFamily, Label, RichText, Ui, Widget, WidgetText};
+use egui_material_icons::icons::ICON_HOME;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
@@ -11,6 +12,15 @@ impl Tab for HomeTab {
     }
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey) {
-        ui.label("Home");
+        ui.horizontal(|ui| {
+            Label::new(
+                RichText::new(ICON_HOME)
+                    .size(16.0)
+                    .family(FontFamily::Proportional),
+            )
+                .ui(ui);
+
+            ui.label("Home");
+        });
     }
 }

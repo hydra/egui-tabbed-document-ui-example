@@ -2,9 +2,12 @@ use crate::app::app_tabs::home::HomeTab;
 use crate::app::app_tabs::new::NewTab;
 use crate::app::app_tabs::TabKind;
 use crate::app::tabs::{TabKey, Tabs};
+use crate::file_picker::Picker;
 use crate::fonts;
 use egui_dock::{DockArea, DockState, Style};
 use egui_i18n::tr;
+use log::info;
+use std::path::PathBuf;
 
 mod app_tabs;
 mod tabs;
@@ -15,6 +18,9 @@ mod tabs;
 pub struct TemplateApp {
     tabs: Tabs,
     tree: DockState<TabKey>,
+
+    #[serde(skip)]
+    file_picker: Picker,
 }
 
 impl Default for TemplateApp {
@@ -26,7 +32,11 @@ impl Default for TemplateApp {
 
         let tree = DockState::new(initial_tab_ids);
 
-        Self { tabs, tree }
+        Self {
+            tabs,
+            tree,
+            file_picker: Picker::default(),
+        }
     }
 }
 
@@ -76,6 +86,16 @@ impl TemplateApp {
         let tab_id = self.tabs.add(TabKind::New(NewTab::default()));
         self.tree.push_to_focused_leaf(tab_id);
     }
+
+    fn pick_file(&mut self) {
+        if !self.file_picker.is_picking() {
+            self.file_picker.pick_file();
+        }
+    }
+
+    fn open_file(&mut self, path: PathBuf) {
+        info!("open file. path: {:?}", path);
+    }
 }
 
 impl eframe::App for TemplateApp {
@@ -121,6 +141,10 @@ impl eframe::App for TemplateApp {
                     if new_button.clicked() {
                         self.add_new_tab();
                     }
+
+                    if _open_button.clicked() {
+                        self.pick_file()
+                    }
                 });
             });
         });
@@ -128,5 +152,9 @@ impl eframe::App for TemplateApp {
         DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
             .show(ctx, &mut self.tabs);
+
+        if let Ok(picked_file) = self.file_picker.picked() {
+            self.open_file(picked_file);
+        }
     }
 }

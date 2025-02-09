@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 use crate::app::tabs::{Tab, TabKey};
 use egui::{TextEdit, Ui, Widget, WidgetText};
-use egui_flex::{Flex, FlexAlignContent, FlexItem};
+use egui_flex::{Flex, FlexAlignContent, FlexDirection, FlexItem};
 use egui_form::garde::{field_path, GardeReport};
 use egui_form::{Form, FormField};
 use egui_i18n::tr;
@@ -43,74 +43,91 @@ impl<'a> Tab<Context<'a>> for NewTab {
     }
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, _context: &mut Context<'a>) {
-        let mut form = Form::new().add_report(GardeReport::new(self.fields.validate()));
-
-        FormField::new(&mut form, field_path!("name"))
-            .label(tr!("form-new-name"))
-            .ui(ui, TextEdit::singleline(&mut self.fields.name));
-
-        let kind_id = ui.id();
-        FormField::new(&mut form, field_path!("kind"))
-            .label(tr!("form-new-kind"))
-            .ui(ui, |ui: &mut egui::Ui| {
-                egui::ComboBox::from_id_salt(kind_id)
-                    .selected_text(match self.fields.kind {
-                        None => tr!("form-common-combo-default"),
-                        Some(NewDocumentKind::Text) => tr!("form-new-kind-text"),
-                        Some(NewDocumentKind::Image) => tr!("form-new-kind-image"),
-                    })
-                    .show_ui(ui, |ui| {
-                        if ui
-                            .add(egui::SelectableLabel::new(
-                                self.fields.kind == Some(NewDocumentKind::Image),
-                                tr!("form-new-kind-image"),
-                            ))
-                            .clicked()
-                        {
-                            self.fields.kind = Some(NewDocumentKind::Image)
-                        }
-                        if ui
-                            .add(egui::SelectableLabel::new(
-                                self.fields.kind == Some(NewDocumentKind::Text),
-                                tr!("form-new-kind-text"),
-                            ))
-                            .clicked()
-                        {
-                            self.fields.kind = Some(NewDocumentKind::Text)
-                        }
-                    })
-                    .response
-            });
-
-        FormField::new(&mut form, field_path!("directory"))
-            .label(tr!("form-new-directory"))
-            .ui(ui, |ui: &mut egui::Ui| {
-                let mut selected_directory = self.fields.directory.clone().map_or("choose!".to_string(), |directory|{
-                    directory.display().to_string()
-                });
-
-                Flex::horizontal()
-                    //.align_content(FlexAlignContent::Stretch)
-                    .w_full()
-                    .show(ui, |flex| {
-                        flex.add_ui(FlexItem::new().grow(9.0), |ui|{
-                            egui::TextEdit::singleline(&mut selected_directory).interactive(false).ui(ui)
-                        });
-                        flex.add_ui(FlexItem::new().grow(1.0), |ui|{
-                            if egui::Button::new("...").ui(ui).clicked() {
-                                self.file_picker.pick_folder()
-                            }
-                        })
-                    }).response
-            });
 
         if let Ok(picked_directory) = self.file_picker.picked() {
             self.fields.directory = Some(picked_directory);
         }
 
-        if let Some(Ok(())) = form.handle_submit(&ui.button(tr!("form-common-button-ok")), ui) {
-            self.on_submit();
-        }
+        Flex::new()
+            .direction(FlexDirection::Vertical)
+            .align_content(FlexAlignContent::Start)
+            .w_full()
+            .show(ui, |outer_flex| {
+                let mut form = Form::new().add_report(GardeReport::new(self.fields.validate()));
+
+                outer_flex.add_ui(FlexItem::new(), |ui| {
+                    FormField::new(&mut form, field_path!("name"))
+                        .label(tr!("form-new-name"))
+                        .ui(ui, TextEdit::singleline(&mut self.fields.name));
+                });
+
+                outer_flex.add_ui(FlexItem::new(), |ui| {
+                    let kind_id = ui.id();
+                    FormField::new(&mut form, field_path!("kind"))
+                        .label(tr!("form-new-kind"))
+                        .ui(ui, |ui: &mut egui::Ui| {
+                            egui::ComboBox::from_id_salt(kind_id)
+                                .selected_text(match self.fields.kind {
+                                    None => tr!("form-common-combo-default"),
+                                    Some(NewDocumentKind::Text) => tr!("form-new-kind-text"),
+                                    Some(NewDocumentKind::Image) => tr!("form-new-kind-image"),
+                                })
+                                .show_ui(ui, |ui| {
+                                    if ui
+                                        .add(egui::SelectableLabel::new(
+                                            self.fields.kind == Some(NewDocumentKind::Image),
+                                            tr!("form-new-kind-image"),
+                                        ))
+                                        .clicked()
+                                    {
+                                        self.fields.kind = Some(NewDocumentKind::Image)
+                                    }
+                                    if ui
+                                        .add(egui::SelectableLabel::new(
+                                            self.fields.kind == Some(NewDocumentKind::Text),
+                                            tr!("form-new-kind-text"),
+                                        ))
+                                        .clicked()
+                                    {
+                                        self.fields.kind = Some(NewDocumentKind::Text)
+                                    }
+                                })
+                                .response
+                        });
+                });
+
+                outer_flex.add_ui(FlexItem::new(), |ui| {
+                    FormField::new(&mut form, field_path!("directory"))
+                        .label(tr!("form-new-directory"))
+                        .ui(ui, |ui: &mut egui::Ui| {
+                            let mut selected_directory = self.fields.directory.clone().map_or("choose!".to_string(), |directory|{
+                                directory.display().to_string()
+                            });
+
+                            Flex::horizontal()
+                                //.align_content(FlexAlignContent::Stretch)
+                                .w_full()
+                                .show(ui, |flex| {
+                                    flex.add_ui(FlexItem::new().grow(9.0), |ui|{
+                                        egui::TextEdit::singleline(&mut selected_directory).interactive(false).ui(ui)
+                                    });
+                                    flex.add_ui(FlexItem::new().grow(1.0), |ui|{
+                                        if egui::Button::new("...").ui(ui).clicked() {
+                                            self.file_picker.pick_folder()
+                                        }
+                                    })
+                                }).response
+                        });
+                });
+
+                outer_flex.add_ui(FlexItem::new(), |ui| {
+                    let button = ui.button(tr!("form-common-button-ok"));
+
+                    if let Some(Ok(())) = form.handle_submit(&button, ui) {
+                        self.on_submit();
+                    }
+                });
+            });
     }
 }
 

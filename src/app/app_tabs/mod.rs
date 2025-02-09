@@ -4,6 +4,7 @@ use crate::app::app_tabs::new::NewTab;
 use crate::app::tabs::{Tab, TabKey};
 use egui::{Ui, WidgetText};
 use serde::{Deserialize, Serialize};
+use crate::TemplateApp;
 
 pub mod document;
 pub mod home;
@@ -16,7 +17,7 @@ pub enum TabKind {
     New(NewTab),
 }
 
-impl Tab for TabKind {
+impl Tab<TemplateApp> for TabKind {
     fn label(&self) -> WidgetText {
         match self {
             TabKind::Home(tab) => tab.label(),
@@ -25,11 +26,11 @@ impl Tab for TabKind {
         }
     }
 
-    fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey) {
+    fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, app: &mut TemplateApp) {
         match self {
-            TabKind::Home(tab) => tab.ui(ui, tab_key),
-            TabKind::Document(tab) => tab.ui(ui, tab_key),
-            TabKind::New(tab) => tab.ui(ui, tab_key),
+            TabKind::Home(tab) => tab.ui(ui, tab_key, app),
+            TabKind::Document(tab) => tab.ui(ui, tab_key, app),
+            TabKind::New(tab) => tab.ui(ui, tab_key, app),
         }
     }
 }

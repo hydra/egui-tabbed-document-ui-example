@@ -5,6 +5,7 @@ use egui_form::{Form, FormField};
 use egui_i18n::tr;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
+use crate::TemplateApp;
 
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
 pub struct NewTab {
@@ -27,12 +28,12 @@ enum NewDocumentKind {
     Image,
 }
 
-impl Tab for NewTab {
+impl Tab<TemplateApp> for NewTab {
     fn label(&self) -> WidgetText {
         egui::widget_text::WidgetText::from("New")
     }
 
-    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey) {
+    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, app: &mut TemplateApp) {
         let mut form = Form::new().add_report(GardeReport::new(self.fields.validate()));
 
         FormField::new(&mut form, field_path!("name"))

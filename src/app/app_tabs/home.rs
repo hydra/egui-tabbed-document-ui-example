@@ -5,18 +5,19 @@ use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use serde::{Deserialize, Serialize};
 use crate::app::Config;
+use crate::TemplateApp;
 
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
 pub struct HomeTab {
     show_on_startup: bool,
 }
 
-impl Tab for HomeTab {
+impl Tab<TemplateApp> for HomeTab {
     fn label(&self) -> WidgetText {
         egui::widget_text::WidgetText::from(tr!("home-tab-label"))
     }
 
-    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey) {
+    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, app: &mut TemplateApp) {
         let frame = egui::frame::Frame::group(ui.style());
 
         Flex::new()
@@ -53,8 +54,7 @@ impl Tab for HomeTab {
                     .show_in(outer_flex, FlexItem::new()
                         .align_self(FlexAlign::Center), |flex| {
                         flex.add_ui(FlexItem::new(), |ui|{
-                            // FIXME need to access config from application state here
-                            let config: &mut Config = todo!();
+                            let config: &mut Config = &mut app.config;
                             ui.checkbox(&mut config.show_home_tab_on_startup, tr!("home-tab-show-on-startup"));
                         });
                     });

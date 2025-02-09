@@ -1,7 +1,7 @@
 use crate::app::app_tabs::home::HomeTab;
 use crate::app::app_tabs::new::NewTab;
 use crate::app::app_tabs::TabKind;
-use crate::app::tabs::{TabKey, Tabs};
+use crate::app::tabs::{MyTabViewer, TabKey, Tabs};
 use crate::file_picker::Picker;
 use crate::fonts;
 use egui_dock::{DockArea, DockState, Style};
@@ -174,9 +174,14 @@ impl eframe::App for TemplateApp {
             });
         });
 
+        let mut my_tab_viewer = MyTabViewer {
+            tabs: &mut self.tabs,
+            state: &mut Default::default(),
+        };
+
         DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
-            .show(ctx, &mut self.tabs);
+            .show(ctx, &mut my_tab_viewer);
 
         if !self.startup_done {
             self.startup_done = true;

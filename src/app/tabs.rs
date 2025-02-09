@@ -4,6 +4,7 @@ use egui_dock::TabViewer;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+use crate::TemplateApp;
 
 #[derive(Debug, Clone, Hash, Copy, Ord, Eq, PartialOrd, PartialEq, Serialize, Deserialize)]
 pub struct TabKey(usize);
@@ -50,12 +51,17 @@ impl Tabs {
     }
 }
 
-pub trait Tab {
+pub trait Tab<App> {
     fn label(&self) -> WidgetText;
-    fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey);
+    fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, app: &mut App);
 }
 
-impl TabViewer for Tabs {
+pub struct MyTabViewer<'a> {
+    pub tabs: &'a mut Tabs,
+    pub state: &'a mut TemplateApp,
+}
+
+impl<'a> TabViewer for MyTabViewer<'a> {
     type Tab = TabKey;
 
     fn id(&mut self, tab: &mut Self::Tab) -> Id {
@@ -63,20 +69,20 @@ impl TabViewer for Tabs {
     }
 
     fn title(&mut self, tab: &mut Self::Tab) -> WidgetText {
-        let tab_instance = self.tabs.get_mut(tab).unwrap();
+        let tab_instance = self.tabs.tabs.get_mut(tab).unwrap();
         tab_instance.label()
     }
 
     fn ui(&mut self, ui: &mut Ui, tab: &mut Self::Tab) {
         // see the api docs for `on_close`, if the active tab was just closed, we still arrive here.
-        if let Some(tab_instance) = self.tabs.get_mut(tab) {
-            tab_instance.ui(ui, tab);
+        if let Some(tab_instance) = self.tabs.tabs.get_mut(tab) {
+            tab_instance.ui(ui, tab, self.state);
         }
     }
 
     fn on_close(&mut self, tab: &mut Self::Tab) -> bool {
         debug!("closing tab, id: {:?}", tab);
-        let _removed = self.tabs.remove(tab);
+        let _removed = self.tabs.tabs.remove(tab);
 
         true
     }

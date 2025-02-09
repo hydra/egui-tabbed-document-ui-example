@@ -1,16 +1,21 @@
+use std::path::PathBuf;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{TextEdit, Ui, WidgetText};
+use egui::{TextEdit, Ui, Widget, WidgetText};
+use egui_flex::{Flex, FlexAlignContent, FlexItem};
 use egui_form::garde::{field_path, GardeReport};
 use egui_form::{Form, FormField};
 use egui_i18n::tr;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
-use crate::TemplateApp;
+use crate::file_picker::Picker;
 
-#[derive(Clone, Default, Debug, Deserialize, Serialize)]
+#[derive(Default, Deserialize, Serialize)]
 pub struct NewTab {
     fields: NewTabForm,
+
+    #[serde(skip)]
+    file_picker: Picker,
 }
 
 // FIXME form errors do not use i18n
@@ -21,6 +26,9 @@ struct NewTabForm {
 
     #[garde(required)]
     kind: Option<NewDocumentKind>,
+
+    #[garde(required)]
+    directory: Option<PathBuf>
 }
 
 #[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
@@ -73,6 +81,32 @@ impl<'a> Tab<Context<'a>> for NewTab {
                     })
                     .response
             });
+
+        FormField::new(&mut form, field_path!("directory"))
+            .label(tr!("form-new-directory"))
+            .ui(ui, |ui: &mut egui::Ui| {
+                let mut selected_directory = self.fields.directory.clone().map_or("choose!".to_string(), |directory|{
+                    directory.display().to_string()
+                });
+
+                Flex::horizontal()
+                    //.align_content(FlexAlignContent::Stretch)
+                    .w_full()
+                    .show(ui, |flex| {
+                        flex.add_ui(FlexItem::new().grow(9.0), |ui|{
+                            egui::TextEdit::singleline(&mut selected_directory).interactive(false).ui(ui)
+                        });
+                        flex.add_ui(FlexItem::new().grow(1.0), |ui|{
+                            if egui::Button::new("...").ui(ui).clicked() {
+                                self.file_picker.pick_folder()
+                            }
+                        })
+                    }).response
+            });
+
+        if let Ok(picked_directory) = self.file_picker.picked() {
+            self.fields.directory = Some(picked_directory);
+        }
 
         if let Some(Ok(())) = form.handle_submit(&ui.button(tr!("form-common-button-ok")), ui) {
             self.on_submit();

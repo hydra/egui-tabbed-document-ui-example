@@ -14,6 +14,7 @@ form-new-name = Name
 form-new-kind = Kind
 form-new-kind-image = Image
 form-new-kind-text = Text
+form-new-directory = Directory
 
 form-common-button-ok = Ok
 form-common-button-cancel = Cancel

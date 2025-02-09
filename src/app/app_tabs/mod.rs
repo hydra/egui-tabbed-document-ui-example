@@ -5,13 +5,12 @@ use crate::app::tabs::{Tab, TabKey};
 use egui::{Ui, WidgetText};
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
-use crate::TemplateApp;
 
 pub mod document;
 pub mod home;
 pub mod new;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize)]
 pub enum TabKind {
     Home(HomeTab),
     Document(DocumentTab),

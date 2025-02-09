@@ -33,8 +33,6 @@ impl<'a> Tab<Context<'a>> for HomeTab {
                     .show_in(outer_flex, FlexItem::new(), |flex| {
                         flex.add_ui(
                             FlexItem::new()
-                                // causes the box of the frame to shrink to the content
-                                .align_self(FlexAlign::Center)
                                 .frame(frame),
                             |ui| {
                                 Label::new(

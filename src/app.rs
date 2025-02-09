@@ -181,8 +181,11 @@ impl eframe::App for TemplateApp {
         });
 
         if !self.startup_done {
-            if !self.config.show_home_tab_on_startup {
+            self.startup_done = true;
 
+            if self.config.show_home_tab_on_startup {
+                self.show_home_tab();
+            } else {
                 if let Some(home_tab_key) = self.find_home_tab() {
                     let find_result = self.tree.find_tab(home_tab_key).unwrap();
                     self.tree.remove_tab(find_result);
@@ -202,14 +205,6 @@ impl eframe::App for TemplateApp {
         DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
             .show(ctx, &mut my_tab_viewer);
-
-        if !self.startup_done {
-            self.startup_done = true;
-
-            if self.config.show_home_tab_on_startup {
-                self.show_home_tab();
-            }
-        }
 
         if let Ok(picked_file) = self.file_picker.picked() {
             self.open_file(picked_file);

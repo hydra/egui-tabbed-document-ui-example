@@ -176,7 +176,7 @@ impl eframe::App for TemplateApp {
 
         let mut my_tab_viewer = MyTabViewer {
             tabs: &mut self.tabs,
-            state: &mut Default::default(),
+            state: self,
         };
 
         DockArea::new(&mut self.tree)

@@ -34,7 +34,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
         egui::widget_text::WidgetText::from("New")
     }
 
-    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context) {
+    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, _context: &mut Context<'a>) {
         let mut form = Form::new().add_report(GardeReport::new(self.fields.validate()));
 
         FormField::new(&mut form, field_path!("name"))

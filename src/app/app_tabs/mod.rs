@@ -27,7 +27,7 @@ impl<'a> Tab<Context<'a>> for TabKind {
         }
     }
 
-    fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, context: &mut Context) {
+    fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, context: &mut Context<'a>) {
         match self {
             TabKind::Home(tab) => tab.ui(ui, tab_key, context),
             TabKind::Document(tab) => tab.ui(ui, tab_key, context),

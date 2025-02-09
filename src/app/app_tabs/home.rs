@@ -4,9 +4,7 @@ use egui_flex::{Flex, FlexAlign, FlexDirection, FlexItem, FlexJustify};
 use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use serde::{Deserialize, Serialize};
-use crate::app::Config;
 use crate::context::Context;
-use crate::TemplateApp;
 
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
 pub struct HomeTab {
@@ -18,7 +16,7 @@ impl<'a> Tab<Context<'a>> for HomeTab {
         egui::widget_text::WidgetText::from(tr!("home-tab-label"))
     }
 
-    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context) {
+    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context<'a>) {
         let frame = egui::frame::Frame::group(ui.style());
 
         Flex::new()

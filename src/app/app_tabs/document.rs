@@ -1,9 +1,7 @@
-use eframe::App;
 use crate::app::tabs::{Tab, TabKey};
 use egui::{Ui, WidgetText};
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
-use crate::TemplateApp;
 
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
 pub struct DocumentTab {
@@ -16,7 +14,7 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
         egui::widget_text::WidgetText::from(title)
     }
 
-    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context) {
+    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, _context: &mut Context<'a>) {
         ui.label(format!("path: {:?}", self.path));
     }
 }

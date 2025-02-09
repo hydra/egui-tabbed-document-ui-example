@@ -46,7 +46,7 @@ impl Default for Config {
 
 impl Default for TemplateApp {
     fn default() -> Self {
-        let mut config = Config::default();
+        let config = Config::default();
 
         let mut tabs = Tabs::new();
 

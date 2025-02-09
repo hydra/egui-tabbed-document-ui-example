@@ -5,7 +5,6 @@ use log::debug;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use crate::context::Context;
-use crate::TemplateApp;
 
 #[derive(Debug, Clone, Hash, Copy, Ord, Eq, PartialOrd, PartialEq, Serialize, Deserialize)]
 pub struct TabKey(usize);

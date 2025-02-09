@@ -5,6 +5,7 @@ use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use serde::{Deserialize, Serialize};
 use crate::app::Config;
+use crate::context::Context;
 use crate::TemplateApp;
 
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
@@ -12,12 +13,12 @@ pub struct HomeTab {
     show_on_startup: bool,
 }
 
-impl Tab<TemplateApp> for HomeTab {
+impl<'a> Tab<Context<'a>> for HomeTab {
     fn label(&self) -> WidgetText {
         egui::widget_text::WidgetText::from(tr!("home-tab-label"))
     }
 
-    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, app: &mut TemplateApp) {
+    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context) {
         let frame = egui::frame::Frame::group(ui.style());
 
         Flex::new()
@@ -54,8 +55,7 @@ impl Tab<TemplateApp> for HomeTab {
                     .show_in(outer_flex, FlexItem::new()
                         .align_self(FlexAlign::Center), |flex| {
                         flex.add_ui(FlexItem::new(), |ui|{
-                            let config: &mut Config = &mut app.config;
-                            ui.checkbox(&mut config.show_home_tab_on_startup, tr!("home-tab-show-on-startup"));
+                            ui.checkbox(&mut context.config.show_home_tab_on_startup, tr!("home-tab-show-on-startup"));
                         });
                     });
             });

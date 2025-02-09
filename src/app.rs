@@ -8,6 +8,7 @@ use egui_dock::{DockArea, DockState, Style};
 use egui_i18n::tr;
 use log::info;
 use std::path::PathBuf;
+use crate::context::Context;
 
 mod app_tabs;
 mod tabs;
@@ -45,7 +46,7 @@ impl Default for Config {
 
 impl Default for TemplateApp {
     fn default() -> Self {
-        let config = Config::default();
+        let mut config = Config::default();
 
         let mut tabs = Tabs::new();
 
@@ -174,9 +175,13 @@ impl eframe::App for TemplateApp {
             });
         });
 
+        let mut context = Context {
+            config: &mut self.config,
+        };
+
         let mut my_tab_viewer = MyTabViewer {
             tabs: &mut self.tabs,
-            state: self,
+            context: &mut context,
         };
 
         DockArea::new(&mut self.tree)

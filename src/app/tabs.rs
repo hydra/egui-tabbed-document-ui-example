@@ -4,6 +4,7 @@ use egui_dock::TabViewer;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+use crate::context::Context;
 use crate::TemplateApp;
 
 #[derive(Debug, Clone, Hash, Copy, Ord, Eq, PartialOrd, PartialEq, Serialize, Deserialize)]
@@ -58,7 +59,7 @@ pub trait Tab<App> {
 
 pub struct MyTabViewer<'a> {
     pub tabs: &'a mut Tabs,
-    pub state: &'a mut TemplateApp,
+    pub context: &'a mut Context<'a>,
 }
 
 impl<'a> TabViewer for MyTabViewer<'a> {
@@ -76,7 +77,7 @@ impl<'a> TabViewer for MyTabViewer<'a> {
     fn ui(&mut self, ui: &mut Ui, tab: &mut Self::Tab) {
         // see the api docs for `on_close`, if the active tab was just closed, we still arrive here.
         if let Some(tab_instance) = self.tabs.tabs.get_mut(tab) {
-            tab_instance.ui(ui, tab, self.state);
+            tab_instance.ui(ui, tab, self.context);
         }
     }
 

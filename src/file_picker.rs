@@ -31,7 +31,7 @@ impl Picker {
         matches!(self.state, PickerState::Picking(_))
     }
 
-    pub fn pick_file(&mut self) {
+    fn prepare(&mut self, some_fn: fn() -> Option<PathBuf>) {
         // initialise the boolean flag in the mutex to false, so that when the main thread continues it can see a
         // file has not been picked yet.  note that the mutex may not be locked until the picker thread starts to run
         // and lock it.
@@ -43,12 +43,26 @@ impl Picker {
                 let mut guard = picker.lock().unwrap();
                 *guard = (
                     true,
-                    rfd::FileDialog::new()
-                        .pick_file()
-                        .map(std::path::PathBuf::from),
+                    some_fn()
                 );
             })
             .unwrap();
+    }
+
+    pub fn pick_file(&mut self) {
+        self.prepare(||
+                    rfd::FileDialog::new()
+                        .pick_file()
+                        .map(std::path::PathBuf::from)
+        );
+    }
+
+    pub fn pick_folder(&mut self) {
+        self.prepare(||
+             rfd::FileDialog::new()
+                 .pick_folder()
+                 .map(std::path::PathBuf::from),
+        );
     }
 
     /// when picked, returns the picked path, or an error indicating the reason

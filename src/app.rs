@@ -83,17 +83,7 @@ impl TemplateApp {
     }
 
     fn show_home_tab(&mut self) {
-        let home_tab = self
-            .tree
-            .iter_all_tabs()
-            .find_map(|(_surface_and_node, tab_key)| {
-                let tab_kind = self.tabs.get(tab_key).unwrap();
-
-                match tab_kind {
-                    TabKind::Home(_) => Some(tab_key),
-                    _ => None,
-                }
-            });
+        let home_tab = self.find_home_tab();
 
         if let Some(home_tab_key) = &home_tab {
             // although we have the tab, we don't know the tab_index, which is required for the call to `set_active_tab`,
@@ -105,6 +95,21 @@ impl TemplateApp {
             let tab_id = self.tabs.add(TabKind::Home(HomeTab::default()));
             self.tree.push_to_focused_leaf(tab_id);
         }
+    }
+
+    fn find_home_tab(&self) -> Option<&TabKey> {
+        let home_tab = self
+            .tree
+            .iter_all_tabs()
+            .find_map(|(_surface_and_node, tab_key)| {
+                let tab_kind = self.tabs.get(tab_key).unwrap();
+
+                match tab_kind {
+                    TabKind::Home(_) => Some(tab_key),
+                    _ => None,
+                }
+            });
+        home_tab
     }
 
     fn add_new_tab(&mut self) {
@@ -174,6 +179,16 @@ impl eframe::App for TemplateApp {
                 });
             });
         });
+
+        if !self.startup_done {
+            if !self.config.show_home_tab_on_startup {
+
+                if let Some(home_tab_key) = self.find_home_tab() {
+                    let find_result = self.tree.find_tab(home_tab_key).unwrap();
+                    self.tree.remove_tab(find_result);
+                }
+            }
+        }
 
         let mut context = Context {
             config: &mut self.config,

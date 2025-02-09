@@ -1,13 +1,14 @@
 use crate::app::app_tabs::home::HomeTab;
 use crate::app::app_tabs::new::NewTab;
 use crate::app::app_tabs::TabKind;
-use crate::app::tabs::{TabKey, Tabs};
+use crate::app::tabs::{MyTabViewer, TabKey, Tabs};
 use crate::file_picker::Picker;
 use crate::fonts;
 use egui_dock::{DockArea, DockState, Style};
 use egui_i18n::tr;
 use log::info;
 use std::path::PathBuf;
+use crate::context::Context;
 
 mod app_tabs;
 mod tabs;
@@ -19,13 +20,36 @@ pub struct TemplateApp {
     tabs: Tabs,
     tree: DockState<TabKey>,
 
+    config: Config,
+
+    // TODO find a better way of doing this that doesn't require this boolean
+    #[serde(skip)]
+    startup_done: bool,
+
     #[serde(skip)]
     file_picker: Picker,
 }
 
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(default)] // if we add new fields, give them default values when deserializing old state
+pub struct Config {
+    show_home_tab_on_startup: bool,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            show_home_tab_on_startup: true,
+        }
+    }
+}
+
 impl Default for TemplateApp {
     fn default() -> Self {
-        let mut tabs = Tabs::default();
+        let mut config = Config::default();
+
+        let mut tabs = Tabs::new();
+
         let _home_tab_id = tabs.add(TabKind::Home(HomeTab::default()));
 
         let initial_tab_ids = tabs.ids();
@@ -35,6 +59,8 @@ impl Default for TemplateApp {
         Self {
             tabs,
             tree,
+            config,
+            startup_done: false,
             file_picker: Picker::default(),
         }
     }
@@ -57,17 +83,7 @@ impl TemplateApp {
     }
 
     fn show_home_tab(&mut self) {
-        let home_tab = self
-            .tree
-            .iter_all_tabs()
-            .find_map(|(_surface_and_node, tab_key)| {
-                let tab_kind = self.tabs.get(tab_key).unwrap();
-
-                match tab_kind {
-                    TabKind::Home(_) => Some(tab_key),
-                    _ => None,
-                }
-            });
+        let home_tab = self.find_home_tab();
 
         if let Some(home_tab_key) = &home_tab {
             // although we have the tab, we don't know the tab_index, which is required for the call to `set_active_tab`,
@@ -79,6 +95,21 @@ impl TemplateApp {
             let tab_id = self.tabs.add(TabKind::Home(HomeTab::default()));
             self.tree.push_to_focused_leaf(tab_id);
         }
+    }
+
+    fn find_home_tab(&self) -> Option<&TabKey> {
+        let home_tab = self
+            .tree
+            .iter_all_tabs()
+            .find_map(|(_surface_and_node, tab_key)| {
+                let tab_kind = self.tabs.get(tab_key).unwrap();
+
+                match tab_kind {
+                    TabKind::Home(_) => Some(tab_key),
+                    _ => None,
+                }
+            });
+        home_tab
     }
 
     fn add_new_tab(&mut self) {
@@ -149,9 +180,36 @@ impl eframe::App for TemplateApp {
             });
         });
 
+        if !self.startup_done {
+            if !self.config.show_home_tab_on_startup {
+
+                if let Some(home_tab_key) = self.find_home_tab() {
+                    let find_result = self.tree.find_tab(home_tab_key).unwrap();
+                    self.tree.remove_tab(find_result);
+                }
+            }
+        }
+
+        let mut context = Context {
+            config: &mut self.config,
+        };
+
+        let mut my_tab_viewer = MyTabViewer {
+            tabs: &mut self.tabs,
+            context: &mut context,
+        };
+
         DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
-            .show(ctx, &mut self.tabs);
+            .show(ctx, &mut my_tab_viewer);
+
+        if !self.startup_done {
+            self.startup_done = true;
+
+            if self.config.show_home_tab_on_startup {
+                self.show_home_tab();
+            }
+        }
 
         if let Ok(picked_file) = self.file_picker.picked() {
             self.open_file(picked_file);

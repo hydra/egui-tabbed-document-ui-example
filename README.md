@@ -2,35 +2,35 @@
 
 ## Requirements
 
-~~- Main window
-  - [ ] native look and feel title bar with native close, minimize, maximize control
-  - [ ] re-sizable, contents adjust to fit.
+- Main window
+  - [x] native look and feel title bar with native close, minimize, maximize control
+  - [x] re-sizable, contents adjust to fit.
 - Toolbar
   - 'Home' button
-    - [ ] which when clicks shows a home tab.
-    - [ ] if the home tab is already open, it should switch to it.
+    - [x] which when clicks shows a home tab.
+    - [x] if the home tab is already open, it should switch to it.
   - 'Open' button
-    - [ ] When clicked, shows a native file selector dialog which allows the user to choose a file.
+    - [x] When clicked, shows a native file selector dialog which allows the user to choose a file.
     - [ ] If an unsupported file is selected, show a native error dialog.
     - [ ] When a file is opened, a tab appears and depending on the file type, it shows different content in the tab. (e.g. '.txt' text shows the 'Text' tab, '.bmp' shows the 'Image' tab).
   - 'New' button
-    - [ ] When clicked the 'New' tab is shown, see below.
+    - [x] When clicked the 'New' tab is shown, see below.
   - [ ] Language dropdown, choose between at least 2 languages (e.g. English and Spanish).
     - [ ] Changing the language should cause all UI text to be immediately displayed in the selected language without requiring a restart.
 - Tab bar
   - [ ] When all the tabs won't fit in the window, there must be some controls to allow them all to be selected, e.g. `<` and `>` buttons, or `V` dropdown, or scrollable.
-  - [ ] Selecting a tab changes the content area below the tab bar.
-  - [ ] Must be obvious which tab is selected when there are only two tabs.
-  - [ ] Each tab should be closable (e.g. an `X` button on the tab or right-click on tab to show a context menu with `Close`)
+  - [x] Selecting a tab changes the content area below the tab bar.
+  - [x] Must be obvious which tab is selected when there are only two tabs.
+  - [x] Each tab should be closable (e.g. an `X` button on the tab or right-click on tab to show a context menu with `Close`)
   - [ ] When a tab is closed, the next most recently used tab is made active.
 - Tab content
-  - [ ] Displays the content for the tab.
-  - [ ] Each tab content must maintain it's state, without expensive re-loads/refreshing of the state, no re-loading of files.
+  - [x] Displays the content for the tab.
+  - [x] Each tab content must maintain it's state, without expensive re-loads/refreshing of the state, no re-loading of files.
   - [ ] Scroll bars should appear if the content does not fit the window.
   - Tabs
     - 'Home' tab
-      - [ ] Shows a welcome message.
-      - [ ] Shows a checkbox with the message 'Open on startup', see 'state items' below.
+      - [x] Shows a welcome message.
+      - [x] Shows a checkbox with the message 'Open on startup', see 'state items' below.
     - 'New' tab
       - [ ] a form is shown with 3 main controls , each with a label, in a grid with labels on the left. Below the form an OK button should be present.
         - Name - text entry, ideally with placeholder text, no default name.
@@ -74,8 +74,9 @@
         - [ ] Image size. (width, height).
 - Application state must be loaded on program start, and saved as appropriate.
   - State items
-    - [ ] 'Open home tab on startup', boolean, initially true.
-      - [ ] If true, open the 'Home' tab on startup.
+    - [x] 'Open home tab on startup', boolean, initially true.
+      - [x] If true, open the 'Home' tab on startup.
+      - [x] If false, the 'Home' tab should not be displayed (regardless of if the tab was open when the app was closed) 
     - [ ] 'List of currently open files' (ignore `New` tabs), list of absolute filenames, initially empty.
       - [ ] Create a tab for each file on startup.
 - Documents

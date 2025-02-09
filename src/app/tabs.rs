@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 #[derive(Debug, Clone, Hash, Copy, Ord, Eq, PartialOrd, PartialEq, Serialize, Deserialize)]
 pub struct TabKey(usize);
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Tabs {
     next_id: usize,
     tabs: BTreeMap<TabKey, TabKind>,
@@ -34,6 +34,13 @@ impl Tabs {
 
     pub fn get(&self, key: &TabKey) -> Option<&TabKind> {
         self.tabs.get(key)
+    }
+
+    pub fn new() -> Tabs {
+        Self {
+            next_id: 0,
+            tabs: BTreeMap::default(),
+        }
     }
 }
 

@@ -19,13 +19,36 @@ pub struct TemplateApp {
     tabs: Tabs,
     tree: DockState<TabKey>,
 
+    config: Config,
+
+    // TODO find a better way of doing this that doesn't require this boolean
+    #[serde(skip)]
+    startup_done: bool,
+
     #[serde(skip)]
     file_picker: Picker,
 }
 
+#[derive(serde::Deserialize, serde::Serialize)]
+#[serde(default)] // if we add new fields, give them default values when deserializing old state
+pub struct Config {
+    show_home_tab_on_startup: bool,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            show_home_tab_on_startup: true,
+        }
+    }
+}
+
 impl Default for TemplateApp {
     fn default() -> Self {
-        let mut tabs = Tabs::default();
+        let config = Config::default();
+
+        let mut tabs = Tabs::new();
+
         let _home_tab_id = tabs.add(TabKind::Home(HomeTab::default()));
 
         let initial_tab_ids = tabs.ids();
@@ -35,6 +58,8 @@ impl Default for TemplateApp {
         Self {
             tabs,
             tree,
+            config,
+            startup_done: false,
             file_picker: Picker::default(),
         }
     }
@@ -152,6 +177,14 @@ impl eframe::App for TemplateApp {
         DockArea::new(&mut self.tree)
             .style(Style::from_egui(ctx.style().as_ref()))
             .show(ctx, &mut self.tabs);
+
+        if !self.startup_done {
+            self.startup_done = true;
+
+            if self.config.show_home_tab_on_startup {
+                self.show_home_tab();
+            }
+        }
 
         if let Ok(picked_file) = self.file_picker.picked() {
             self.open_file(picked_file);

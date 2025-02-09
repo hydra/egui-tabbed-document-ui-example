@@ -8,6 +8,7 @@ menu-item-quit = Quit
 
 home-tab-label = Home
 home-heading = Home
+home-tab-show-on-startup = Show on startup
 
 form-new-name = Name
 form-new-kind = Kind

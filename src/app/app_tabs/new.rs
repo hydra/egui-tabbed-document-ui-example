@@ -52,12 +52,10 @@ impl<'a> Tab<Context<'a>> for NewTab {
             .w_full()
             .show(ui, |mut flex| {
             flex.add_ui(
-                item()
-                    .grow(1.0),
+                item().grow(1.0),
                 |ui: &mut Ui | {
                 ui.add(
                     TextEdit::singleline(&mut text)
-                        .desired_width(10.0),
                 );
             });
             flex.add_ui(
@@ -73,9 +71,9 @@ impl<'a> Tab<Context<'a>> for NewTab {
             .show(ui, |flex| {
                 flex.add(
                     item().grow(1.0),
-                    TextEdit::singleline(&mut text).desired_width(10.0),
+                    TextEdit::singleline(&mut text)
                 );
-                flex.add(item(), Button::new("Click me!"));
+                flex.add(item(), Button::new("..."));
             });
     }
 }

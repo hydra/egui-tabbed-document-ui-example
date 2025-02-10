@@ -1,10 +1,8 @@
 use std::path::PathBuf;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Frame, TextEdit, Ui, Widget, WidgetText};
-use egui_flex::{item, Flex, FlexAlign, FlexAlignContent, FlexDirection, FlexItem};
-use egui_form::garde::{field_path, GardeReport};
-use egui_form::{Form, FormField};
-use egui_i18n::tr;
+use egui::{Button, TextEdit, Ui, WidgetText};
+use egui_flex::{item, Flex, FlexAlignContent};
+
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
@@ -51,29 +49,34 @@ impl<'a> Tab<Context<'a>> for NewTab {
         let mut text = "text".to_owned();
 
         Flex::horizontal()
-            // no effect
-            //.grow_items(1.0)
+            .w_full()
             .show(ui, |mut flex| {
             flex.add_ui(
                 item()
-                    //.grow(1.0),
-                    ,
+                    .grow(1.0),
                 |ui: &mut Ui | {
                 ui.add(
-                    egui::TextEdit::singleline(&mut text)
-                        // FAIL - takes up the entire window width.
-                        //.desired_width(ui.available_width()),
+                    TextEdit::singleline(&mut text)
+                        .desired_width(10.0),
                 );
             });
             flex.add_ui(
-                item()
-                    //.grow(1.0),
-                    ,
+                item(),
                 |ui| {
                 ui.add(egui::Button::new("..."));
             });
         });
 
+        Flex::horizontal()
+            .align_content(FlexAlignContent::Stretch)
+            .w_full()
+            .show(ui, |flex| {
+                flex.add(
+                    item().grow(1.0),
+                    TextEdit::singleline(&mut text).desired_width(10.0),
+                );
+                flex.add(item(), Button::new("Click me!"));
+            });
     }
 }
 

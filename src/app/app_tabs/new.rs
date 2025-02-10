@@ -1,11 +1,16 @@
 use std::path::PathBuf;
 use eframe::emath::Align2;
+use eframe::epaint::FontFamily;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Button, Frame, Label, TextEdit, Ui, WidgetText};
+use egui::{Button, Frame, Label, RichText, TextEdit, Ui, WidgetText};
 use egui_flex::{item, Flex, FlexAlign, FlexAlignContent, FlexDirection, FlexItem, FlexJustify};
 use egui_form::{EguiValidationReport, Form, FormField};
 use egui_form::garde::{field_path, GardeReport};
 use egui_i18n::tr;
+use egui_material_icons::icons::ICON_HOME;
+use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent, span};
+use egui_taffy::taffy::{Size, Style};
+use egui_taffy::{taffy, tui, TuiBuilderLogic};
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
@@ -49,6 +54,129 @@ impl<'a> Tab<Context<'a>> for NewTab {
             self.fields.directory = Some(picked_directory);
         }
 
+
+        ui.ctx().style_mut(|style| {
+            // if this is not done, text in labels/checkboxes/etc wraps
+            style.wrap_mode = Some(egui::TextWrapMode::Extend);
+        });
+
+        let default_style = || Style {
+            padding: length(8.),
+            gap: length(8.),
+            ..Default::default()
+        };
+
+        tui(ui, ui.id().with("new"))
+            .reserve_available_width()
+            .style(Style {
+                //justify_content: Some(taffy::JustifyContent::Center),
+                align_items: Some(taffy::AlignItems::Center),
+                flex_direction: taffy::FlexDirection::Column,
+                size: taffy::Size {
+                    width: percent(1.),
+                    height: auto(),
+                },
+                ..default_style()
+            })
+            .show(|tui| {
+                tui
+                    .style(Style {
+                        //flex_grow: 1.0,
+                        flex_direction: taffy::FlexDirection::Row,
+                        align_self: Some(taffy::AlignSelf::Stretch),
+                        //align_items: Some(taffy::AlignItems::Stretch),
+                        //justify_content: Some(taffy::JustifyContent::Stretch),
+                        ..default_style()
+                    })
+                    .add_with_border(|tui|{
+
+                        //
+                        // Grid container
+                        //
+                        tui
+                            .style(Style {
+                                flex_grow: 1.0,
+                                display: taffy::Display::Grid,
+                                grid_template_columns: vec![fit_content(percent(1.)), fr(1.)],
+                                grid_template_rows: vec![fr(1.), fr(1.)],
+
+                                // Stretch grid cells by default to fill space
+                                //align_items: Some(taffy::AlignItems::Stretch),
+                                //justify_items: Some(taffy::AlignItems::Stretch),
+                                ..default_style()
+                            })
+                            .add_with_border(|tui|{
+
+                                tui
+                                    .style(Style {
+                                        ..default_style()
+                                    })
+                                    .add_with_border(|tui| {
+                                        tui.label("left")
+                                    });
+
+                                tui
+                                    .style(Style {
+                                        flex_grow: 1.0,
+                                        ..default_style()
+                                    })
+                                    .add_with_border(|tui| {
+                                        tui.label("right")
+                                    });
+
+                                tui
+                                    .style(Style {
+                                        grid_column: span(2),
+                                        ..default_style()
+                                    })
+                                    .add_with_border(|tui| {
+                                        tui.label("spanned")
+                                    });
+
+                                tui
+                                    .style(Style {
+                                        ..default_style()
+                                    })
+                                    .add_with_border(|tui| {
+                                        tui.label("left (longer)")
+                                    });
+
+                                tui
+                                    .style(Style {
+                                        flex_grow: 1.0,
+                                        ..default_style()
+                                    })
+                                    .add_with_border(|tui| {
+                                        tui.label("right")
+                                    });
+
+                                tui
+                                    .style(Style {
+                                        grid_column: span(2),
+                                        ..default_style()
+                                    })
+                                    .add_with_border(|tui| {
+                                        tui.label("spanned")
+                                    });
+                            });
+                });
+
+                // FIXME the submit button has the same height as the grid, why?!
+                tui
+                    .style(Style {
+                        //display: taffy::Display::Flex,
+                        //flex_grow: 1.0,
+                        // size: Size {
+                        //     width: auto(),
+                        //     height: percent(0.2),
+                        // },
+                        ..default_style()
+                    })
+                    .ui_add(egui::Button::new("submit"));
+            });
+
+
+        /*
         let frame = Frame::group(ui.style());
 
         Flex::vertical()
@@ -231,6 +359,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
                 );
                 flex.add(item(), Button::new("..."));
             });
+
+         */
     }
 }
 

@@ -3,6 +3,9 @@ use egui::{Checkbox, FontFamily, Frame, Label, RichText, Ui, Widget, WidgetText}
 use egui_flex::{item, Flex, FlexAlign, FlexDirection, FlexItem, FlexJustify};
 use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
+use egui_taffy::taffy::{AlignItems, Style};
+use egui_taffy::{taffy, tui, TuiBuilderLogic};
+use egui_taffy::taffy::prelude::{auto, length, percent};
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
 
@@ -17,35 +20,49 @@ impl<'a> Tab<Context<'a>> for HomeTab {
     }
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context<'a>) {
-        let frame = egui::frame::Frame::group(ui.style());
 
-        Flex::new()
-            .justify(FlexJustify::Center)
-            .direction(FlexDirection::Vertical)
-            .align_items(FlexAlign::Center)
-            .h_full()
-            .w_full()
-            .show(ui, |outer_flex| {
-                outer_flex.add_flex(item().frame(frame), Flex::horizontal(), |flex| {
-                    flex.add(
-                        item(),
-                        Label::new(
-                            RichText::new(ICON_HOME)
-                                .size(48.0)
-                                .family(FontFamily::Proportional),
-                        ),
-                    );
-                    flex.add(
-                        item(),
-                        Label::new(
-                            RichText::new(tr!("home-heading"))
-                                .size(48.0)
-                                .family(FontFamily::Proportional),
-                        ),
-                    );
+        ui.ctx().style_mut(|style| {
+            // if this is not done, text in labels/checkboxes/etc wraps
+            style.wrap_mode = Some(egui::TextWrapMode::Extend);
+        });
+
+        let default_style = || Style {
+            padding: length(8.),
+            gap: length(8.),
+            ..Default::default()
+        };
+
+        tui(ui, ui.id().with("home"))
+            .reserve_available_space()
+            .style(Style {
+                justify_content: Some(taffy::JustifyContent::Center),
+                align_items: Some(taffy::AlignItems::Center),
+                flex_direction: taffy::FlexDirection::Column,
+                size: taffy::Size {
+                    width: percent(1.),
+                    height: percent(1.),
+                },
+                ..default_style()
+            })
+            .show(|tui|{
+                tui
+                    .style(Style {
+                        flex_direction: taffy::FlexDirection::Row,
+                        //align_self: Some(taffy::AlignItems::Center),
+                        ..default_style()
+                    })
+                    .add_with_border(|tui|{
+                        tui.label(RichText::new(ICON_HOME)
+                            .size(48.0)
+                            .family(FontFamily::Proportional));
+                        tui.label(RichText::new(tr!("home-heading"))
+                            .size(48.0)
+                            .family(FontFamily::Proportional));
+                    });
+
+                tui.ui(|ui|{
+                    ui.add(Checkbox::new(&mut context.config.show_home_tab_on_startup, tr!("home-tab-show-on-startup")));
                 });
-
-                outer_flex.add(item(), Checkbox::new(&mut context.config.show_home_tab_on_startup, tr!("home-tab-show-on-startup")));
             });
     }
 }

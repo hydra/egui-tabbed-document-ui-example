@@ -24,6 +24,7 @@ egui_dock = { path = "../egui_dock", features = ["serde"]}
 egui_material_icons = { path = "../hello_egui/crates/egui_material_icons" }
 egui_flex = { path = "../hello_egui/crates/egui_flex" }
 egui_form = { path = "../hello_egui/crates/egui_form", features = ["validator_garde"] }
+egui_taffy = "0.7.0"
 garde = { version = "0.22.0", features = ["derive", "serde"]}
 rfd = "0.15.2"
 

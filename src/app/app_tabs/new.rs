@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Button, TextEdit, Ui, WidgetText};
+use egui::{Button, Label, TextEdit, Ui, WidgetText};
 use egui_flex::{item, Flex, FlexAlignContent};
 
 use garde::Validate;
@@ -47,23 +47,6 @@ impl<'a> Tab<Context<'a>> for NewTab {
         }
 
         let mut text = "text".to_owned();
-
-        Flex::horizontal()
-            .w_full()
-            .show(ui, |mut flex| {
-            flex.add_ui(
-                item().grow(1.0),
-                |ui: &mut Ui | {
-                ui.add(
-                    TextEdit::singleline(&mut text)
-                );
-            });
-            flex.add_ui(
-                item(),
-                |ui| {
-                ui.add(egui::Button::new("..."));
-            });
-        });
 
         Flex::horizontal()
             .align_content(FlexAlignContent::Stretch)

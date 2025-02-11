@@ -177,7 +177,12 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                     })
                                                     .ui_add(TextEdit::singleline(&mut text));
 
-                                                tui.ui_add(Button::new("..."));
+                                                tui
+                                                    .style(Style {
+                                                        flex_grow: 0.0,
+                                                        ..default_style()
+                                                    })
+                                                    .ui_add(Button::new("..."));
                                             });
                                     });
 

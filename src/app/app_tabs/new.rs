@@ -81,7 +81,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
             .show(|tui| {
                 tui
                     .style(Style {
-                        flex_grow: 1.0,
+                        //flex_grow: 1.0,
                         flex_direction: taffy::FlexDirection::Row,
                         align_self: Some(taffy::AlignSelf::Stretch),
                         align_items: Some(taffy::AlignItems::Stretch),

@@ -169,7 +169,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
 
                                                 tui
                                                     .style(Style {
-                                                        border: length(1.0),
+                                                        border: length(2.0),
                                                         align_content: Some(AlignContent::Stretch),
                                                         align_self: Some(AlignSelf::Stretch),
                                                         align_items: Some(AlignItems::Stretch),
@@ -196,6 +196,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
 
                                                 tui
                                                     .style(Style {
+                                                        border: length(2.0),
                                                         //flex_grow: 0.0,
                                                         ..default_style()
                                                     })

@@ -153,12 +153,13 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         // FIXME text input does not resize with grid cell.
                                         tui
                                             .style(Style {
+                                                display: Display::Flex,
                                                 align_content: Some(AlignContent::Stretch),
-                                                align_self: Some(AlignSelf::Stretch),
-                                                align_items: Some(AlignItems::Stretch),
-                                                justify_content: Some(JustifyContent::Stretch),
-                                                justify_self: Some(JustifySelf::Stretch),
-                                                justify_items: Some(JustifyItems::Stretch),
+                                                // align_self: Some(AlignSelf::Stretch),
+                                                // align_items: Some(AlignItems::Stretch),
+                                                // justify_content: Some(JustifyContent::Stretch),
+                                                // justify_self: Some(JustifySelf::Stretch),
+                                                // justify_items: Some(JustifyItems::Stretch),
                                                 flex_grow: 1.0,
                                                 ..default_style()
                                             })
@@ -166,26 +167,26 @@ impl<'a> Tab<Context<'a>> for NewTab {
 
                                                 tui
                                                     .style(Style {
-                                                        align_content: Some(AlignContent::Stretch),
-                                                        align_self: Some(AlignSelf::Stretch),
-                                                        align_items: Some(AlignItems::Stretch),
-                                                        justify_content: Some(JustifyContent::Stretch),
-                                                        justify_self: Some(JustifySelf::Stretch),
-                                                        justify_items: Some(JustifyItems::Stretch),
+                                                        // align_content: Some(AlignContent::Stretch),
+                                                        // align_self: Some(AlignSelf::Stretch),
+                                                        // align_items: Some(AlignItems::Stretch),
+                                                        // justify_content: Some(JustifyContent::Stretch),
+                                                        // justify_self: Some(JustifySelf::Stretch),
+                                                        // justify_items: Some(JustifyItems::Stretch),
                                                         display: Display::Flex,
                                                         flex_grow: 1.0,
-                                                        size: Size {
-                                                            width: percent(1.0),
-                                                            height: auto(),
-                                                        },
-                                                        min_size: Size {
-                                                            width: percent(1.0),
-                                                            height: auto(),
-                                                        },
-                                                        max_size: Size {
-                                                            width: percent(1.0),
-                                                            height: auto(),
-                                                        },
+                                                        // size: Size {
+                                                        //     width: percent(1.0),
+                                                        //     height: auto(),
+                                                        // },
+                                                        // min_size: Size {
+                                                        //     width: percent(1.0),
+                                                        //     height: auto(),
+                                                        // },
+                                                        // max_size: Size {
+                                                        //     width: percent(1.0),
+                                                        //     height: auto(),
+                                                        // },
                                                         ..default_style()
                                                     })
                                                     .ui_add(TextEdit::singleline(&mut text));

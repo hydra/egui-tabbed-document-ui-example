@@ -162,16 +162,12 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                             })
                                             .add_with_border(|tui| {
 
-                                                tui.style(taffy::Style {
-                                                    flex_grow: 1.0,
-                                                    ..Default::default()
-                                                })
-                                                    .ui(|ui| {
-                                                        ui.add_sized(
-                                                            ui.available_size(),
-                                                            egui::TextEdit::singleline(&mut text),
-                                                        );
-                                                    });
+                                                tui
+                                                    .style(Style {
+                                                        flex_grow: 1.0,
+                                                        ..default_style()
+                                                    })
+                                                    .ui_add(egui::TextEdit::singleline(&mut text));
 
                                                 tui
                                                     .style(Style {

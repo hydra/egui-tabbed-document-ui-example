@@ -103,7 +103,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
 
                                 // Stretch grid cells by default to fill space
                                 //align_items: Some(taffy::AlignItems::Stretch),
-                                justify_items: Some(taffy::AlignItems::Stretch),
+                                //justify_items: Some(taffy::AlignItems::Stretch),
                                 ..default_style()
                             })
                             .add_with_border(|tui|{

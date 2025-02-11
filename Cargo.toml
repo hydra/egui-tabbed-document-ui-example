@@ -19,11 +19,18 @@ eframe = { version = "0.31.0", default-features = false, features = [
     "persistence",   # Enable restoring app state when restarting the app.
     "wayland",       # To support Linux (and CI)
 ] }
-egui-i18n = { path = "../egui-i18n/i18n" }
-egui_dock = { path = "../egui_dock", features = ["serde"]}
-egui_material_icons = { path = "../hello_egui/crates/egui_material_icons" }
-egui_flex = { path = "../hello_egui/crates/egui_flex" }
-egui_form = { path = "../hello_egui/crates/egui_form", features = ["validator_garde"] }
+
+# latest version may be ok, but this version works
+egui-i18n = { git = "https://github.com/fewensa/egui-i18n", rev = "3be4d89e6328d545a715529ac80415f49d675756" }
+
+# 0.16 supports egui 0.31
+egui_dock = { version = "0.16.0", features = ["serde"]}
+
+egui_material_icons = { git = "https://github.com/lucasmerlin/hello_egui.git", tag = "hello_egui-v0.8.0" }
+
+#egui_flex = { path = "../hello_egui/crates/egui_flex" }
+#egui_form = { path = "../hello_egui/crates/egui_form", features = ["validator_garde"] }
+
 egui_taffy = "0.7.0"
 garde = { version = "0.22.0", features = ["derive", "serde"]}
 rfd = "0.15.2"

@@ -8,7 +8,7 @@ use egui_form::{EguiValidationReport, Form, FormField};
 use egui_form::garde::{field_path, GardeReport};
 use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
-use egui_taffy::taffy::prelude::{auto, fr, length, percent, span};
+use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent, span};
 use egui_taffy::taffy::{Size, Style};
 use egui_taffy::{taffy, tui, TuiBuilderLogic};
 use garde::Validate;
@@ -98,7 +98,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                             .style(Style {
                                 flex_grow: 1.0,
                                 display: taffy::Display::Grid,
-                                grid_template_columns: vec![fr(1.), fr(1.)],
+                                grid_template_columns: vec![fit_content(percent(1.)), fr(1.)],
                                 grid_template_rows: vec![fr(1.), fr(1.)],
 
                                 // Stretch grid cells by default to fill space
@@ -139,7 +139,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         ..default_style()
                                     })
                                     .add_with_border(|tui| {
-                                        tui.label("left")
+                                        tui.label("left (longer)")
                                     });
 
                                 tui

@@ -9,7 +9,7 @@ use egui_form::garde::{field_path, GardeReport};
 use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent, span};
-use egui_taffy::taffy::{Size, Style};
+use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, JustifyContent, JustifyItems, JustifySelf, Size, Style};
 use egui_taffy::{taffy, tui, TuiBuilderLogic};
 use garde::Validate;
 use serde::{Deserialize, Serialize};
@@ -50,6 +50,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, _context: &mut Context<'a>) {
 
+        let mut text = "text".to_string();
+
         if let Ok(picked_directory) = self.file_picker.picked() {
             self.fields.directory = Some(picked_directory);
         }
@@ -61,8 +63,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
         });
 
         let default_style = || Style {
-            padding: length(8.),
-            gap: length(8.),
+            padding: length(2.),
+            gap: length(2.),
             ..Default::default()
         };
 
@@ -76,6 +78,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
                     width: percent(1.),
                     height: auto(),
                 },
+                padding: length(8.),
+                gap: length(8.),
                 ..default_style()
             })
             .show(|tui| {
@@ -147,7 +151,38 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         ..default_style()
                                     })
                                     .add_with_border(|tui| {
-                                        tui.label("right")
+
+                                        // FIXME text input does not resize with grid cell, known issue - https://discord.com/channels/900275882684477440/904461220592119849/1338883750922293319
+                                        tui
+                                            .style(Style {
+                                                display: Display::Flex,
+                                                align_content: Some(AlignContent::Stretch),
+                                                flex_grow: 1.0,
+                                                ..default_style()
+                                            })
+                                            .add_with_border(|tui| {
+
+                                                // tui
+                                                //     .style(Style {
+                                                //         flex_grow: 1.0,
+                                                //         ..default_style()
+                                                //     })
+                                                //     .ui_add(TextEdit::singleline(&mut text));
+
+                                                tui.ui(|ui| {
+                                                    ui.add_sized(
+                                                        ui.available_size(),
+                                                        egui::TextEdit::singleline(&mut text)
+                                                    );
+                                                });
+
+                                                tui
+                                                    .style(Style {
+                                                        flex_grow: 0.0,
+                                                        ..default_style()
+                                                    })
+                                                    .ui_add(Button::new("..."));
+                                            });
                                     });
 
                                 tui

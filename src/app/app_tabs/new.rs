@@ -90,7 +90,6 @@ impl<'a> Tab<Context<'a>> for NewTab {
                     })
                     .add_with_border(|tui|{
 
-                        // FIXME the grid doesn't resize horizontally
                         //
                         // Grid container
                         //

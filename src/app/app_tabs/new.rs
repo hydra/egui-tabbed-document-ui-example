@@ -96,7 +96,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                         //
                         tui
                             .style(Style {
-                                //flex_grow: 1.0,
+                                flex_grow: 1.0,
                                 display: taffy::Display::Grid,
                                 grid_template_columns: vec![fr(1.), fr(1.)],
                                 grid_template_rows: vec![fr(1.), fr(1.)],

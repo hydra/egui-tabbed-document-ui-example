@@ -63,8 +63,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
         });
 
         let default_style = || Style {
-            padding: length(8.),
-            gap: length(8.),
+            padding: length(2.),
+            gap: length(2.),
             ..Default::default()
         };
 
@@ -78,6 +78,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
                     width: percent(1.),
                     height: auto(),
                 },
+                padding: length(8.),
+                gap: length(8.),
                 ..default_style()
             })
             .show(|tui| {
@@ -193,7 +195,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
 
                                                 tui
                                                     .style(Style {
-                                                        flex_grow: 0.0,
+                                                        //flex_grow: 0.0,
                                                         ..default_style()
                                                     })
                                                     .ui_add(Button::new("..."));

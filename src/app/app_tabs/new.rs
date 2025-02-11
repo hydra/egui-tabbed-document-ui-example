@@ -69,7 +69,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
         tui(ui, ui.id().with("new"))
             .reserve_available_width()
             .style(Style {
-                justify_content: Some(taffy::JustifyContent::Center),
+                //justify_content: Some(taffy::JustifyContent::Center),
                 align_items: Some(taffy::AlignItems::Center),
                 flex_direction: taffy::FlexDirection::Column,
                 size: taffy::Size {

@@ -127,6 +127,15 @@ impl<'a> Tab<Context<'a>> for NewTab {
 
                                 tui
                                     .style(Style {
+                                        grid_column: span(2),
+                                        ..default_style()
+                                    })
+                                    .add_with_border(|tui| {
+                                        tui.label("spanned")
+                                    });
+
+                                tui
+                                    .style(Style {
                                         ..default_style()
                                     })
                                     .add_with_border(|tui| {
@@ -141,16 +150,15 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                     .add_with_border(|tui| {
                                         tui.label("right")
                                     });
-                                //
-                                // tui
-                                //     .style(Style {
-                                //         grid_column: span(3),
-                                //         ..default_style()
-                                //     })
-                                //     .add_with_border(|tui| {
-                                //         tui.label("spanned")
-                                //     });
 
+                                tui
+                                    .style(Style {
+                                        grid_column: span(2),
+                                        ..default_style()
+                                    })
+                                    .add_with_border(|tui| {
+                                        tui.label("spanned")
+                                    });
                             });
                 });
 

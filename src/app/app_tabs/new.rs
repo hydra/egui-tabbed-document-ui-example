@@ -9,7 +9,7 @@ use egui_form::garde::{field_path, GardeReport};
 use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent, span};
-use egui_taffy::taffy::{Size, Style};
+use egui_taffy::taffy::{AlignContent, Size, Style};
 use egui_taffy::{taffy, tui, TuiBuilderLogic};
 use garde::Validate;
 use serde::{Deserialize, Serialize};
@@ -49,6 +49,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
     }
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, _context: &mut Context<'a>) {
+
+        let mut text = "text".to_string();
 
         if let Ok(picked_directory) = self.file_picker.picked() {
             self.fields.directory = Some(picked_directory);
@@ -147,7 +149,18 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         ..default_style()
                                     })
                                     .add_with_border(|tui| {
-                                        tui.label("right")
+
+                                        // FIXME text input does not resize with grid cell.
+                                        tui
+                                            .style(Style {
+                                                flex_grow: 1.0,
+                                                ..default_style()
+                                            })
+                                            .add_with_border(|tui| {
+
+                                                tui.ui_add(TextEdit::singleline(&mut text));
+                                                tui.ui_add(Button::new("..."));
+                                            });
                                     });
 
                                 tui

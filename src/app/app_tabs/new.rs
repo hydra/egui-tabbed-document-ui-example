@@ -102,7 +102,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                 grid_template_rows: vec![fr(1.), fr(1.)],
 
                                 // Stretch grid cells by default to fill space
-                                align_items: Some(taffy::AlignItems::Stretch),
+                                //align_items: Some(taffy::AlignItems::Stretch),
                                 justify_items: Some(taffy::AlignItems::Stretch),
                                 ..default_style()
                             })

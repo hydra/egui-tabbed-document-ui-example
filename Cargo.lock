@@ -979,6 +979,7 @@ dependencies = [
 [[package]]
 name = "egui-i18n"
 version = "0.1.0"
+source = "git+https://github.com/fewensa/egui-i18n?rev=3be4d89e6328d545a715529ac80415f49d675756#3be4d89e6328d545a715529ac80415f49d675756"
 dependencies = [
  "log",
  "once_cell",
@@ -1027,27 +1028,14 @@ dependencies = [
 
 [[package]]
 name = "egui_dock"
-version = "0.15.0"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ea7536fb0243aea55c1ca123a41a18253e16520d427a7213da584b9e2cb3973"
 dependencies = [
  "duplicate",
  "egui",
  "paste",
  "serde",
-]
-
-[[package]]
-name = "egui_flex"
-version = "0.3.0"
-dependencies = [
- "egui",
-]
-
-[[package]]
-name = "egui_form"
-version = "0.5.0"
-dependencies = [
- "egui",
- "garde",
 ]
 
 [[package]]
@@ -1071,6 +1059,7 @@ dependencies = [
 [[package]]
 name = "egui_material_icons"
 version = "0.3.0"
+source = "git+https://github.com/lucasmerlin/hello_egui.git?tag=hello_egui-v0.8.0#bb14772a4b9ba476e7f5149e3eeb9542db34e32e"
 dependencies = [
  "egui",
 ]
@@ -2927,8 +2916,6 @@ dependencies = [
  "egui",
  "egui-i18n",
  "egui_dock",
- "egui_flex",
- "egui_form",
  "egui_material_icons",
  "egui_taffy",
  "env_logger",

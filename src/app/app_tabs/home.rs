@@ -1,6 +1,6 @@
 use crate::app::tabs::{Tab, TabKey};
 use egui::{Checkbox, FontFamily, Frame, Label, RichText, Ui, Widget, WidgetText};
-use egui_flex::{item, Flex, FlexAlign, FlexDirection, FlexItem, FlexJustify};
+//use egui_flex::{item, Flex, FlexAlign, FlexDirection, FlexItem, FlexJustify};
 use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use egui_taffy::taffy::{AlignItems, Style};

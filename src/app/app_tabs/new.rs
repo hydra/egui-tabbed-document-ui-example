@@ -165,8 +165,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                         align_self: Some(AlignSelf::Stretch),
                                                         align_items: Some(AlignItems::Stretch),
                                                         flex_grow: 1.0,
-                                                        max_size: Size {
-                                                            width: auto(),
+                                                        size: Size {
+                                                            width: percent(1.0),
                                                             height: auto(),
                                                         },
                                                         ..default_style()

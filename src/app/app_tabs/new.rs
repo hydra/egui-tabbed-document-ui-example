@@ -154,6 +154,11 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         tui
                                             .style(Style {
                                                 align_content: Some(AlignContent::Stretch),
+                                                align_self: Some(AlignSelf::Stretch),
+                                                align_items: Some(AlignItems::Stretch),
+                                                justify_content: Some(JustifyContent::Stretch),
+                                                justify_self: Some(JustifySelf::Stretch),
+                                                justify_items: Some(JustifyItems::Stretch),
                                                 flex_grow: 1.0,
                                                 ..default_style()
                                             })

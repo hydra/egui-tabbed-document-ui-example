@@ -159,7 +159,12 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                             })
                                             .add_with_border(|tui| {
 
-                                                tui.ui_add(TextEdit::singleline(&mut text));
+                                                tui
+                                                    .style(Style {
+                                                        flex_grow: 1.0,
+                                                        ..default_style()
+                                                    })
+                                                    .ui_add(TextEdit::singleline(&mut text));
                                                 tui.ui_add(Button::new("..."));
                                             });
                                     });

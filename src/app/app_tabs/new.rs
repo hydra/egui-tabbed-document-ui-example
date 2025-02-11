@@ -9,7 +9,7 @@ use egui_form::garde::{field_path, GardeReport};
 use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent, span};
-use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, JustifyContent, JustifyItems, JustifySelf, Size, Style};
+use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, JustifyContent, JustifyItems, JustifySelf, Size, Style};
 use egui_taffy::{taffy, tui, TuiBuilderLogic};
 use garde::Validate;
 use serde::{Deserialize, Serialize};
@@ -167,6 +167,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                         justify_content: Some(JustifyContent::Stretch),
                                                         justify_self: Some(JustifySelf::Stretch),
                                                         justify_items: Some(JustifyItems::Stretch),
+                                                        display: Display::Flex,
                                                         flex_grow: 1.0,
                                                         size: Size {
                                                             width: percent(1.0),

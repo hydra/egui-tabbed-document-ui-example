@@ -70,7 +70,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
             .reserve_available_width()
             .style(Style {
                 justify_content: Some(taffy::JustifyContent::Center),
-                align_items: Some(taffy::AlignItems::Stretch),
+                align_items: Some(taffy::AlignItems::Center),
                 flex_direction: taffy::FlexDirection::Column,
                 size: taffy::Size {
                     width: percent(1.),
@@ -83,6 +83,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                     .style(Style {
                         flex_grow: 1.0,
                         flex_direction: taffy::FlexDirection::Row,
+                        align_self: Some(taffy::AlignSelf::Stretch),
                         align_items: Some(taffy::AlignItems::Stretch),
                         justify_content: Some(taffy::JustifyContent::Stretch),
                         ..default_style()

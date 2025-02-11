@@ -174,10 +174,18 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                         justify_items: Some(JustifyItems::Stretch),
                                                         display: Display::Flex,
                                                         flex_grow: 1.0,
-                                                        // size: Size {
-                                                        //     width: percent(1.0),
-                                                        //     height: auto(),
-                                                        // },
+                                                        size: Size {
+                                                            width: percent(1.0),
+                                                            height: auto(),
+                                                        },
+                                                        min_size: Size {
+                                                            width: percent(1.0),
+                                                            height: auto(),
+                                                        },
+                                                        max_size: Size {
+                                                            width: percent(1.0),
+                                                            height: auto(),
+                                                        },
                                                         ..default_style()
                                                     })
                                                     .ui_add(TextEdit::singleline(&mut text));

@@ -153,6 +153,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         // FIXME text input does not resize with grid cell.
                                         tui
                                             .style(Style {
+                                                align_content: Some(AlignContent::Stretch),
                                                 flex_grow: 1.0,
                                                 ..default_style()
                                             })

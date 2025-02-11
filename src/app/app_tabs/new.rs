@@ -83,6 +83,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                     .style(Style {
                         flex_grow: 1.0,
                         flex_direction: taffy::FlexDirection::Row,
+                        //justify_content: Some(taffy::JustifyContent::Stretch),
                         ..default_style()
                     })
                     .add_with_border(|tui|{

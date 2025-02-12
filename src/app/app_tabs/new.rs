@@ -3,7 +3,7 @@ use eframe::emath::Align2;
 use eframe::epaint::FontFamily;
 use eframe::glow::RED;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Button, Color32, Frame, Label, Response, RichText, TextEdit, Ui, Widget, WidgetText};
+use egui::{Button, Color32, Frame, Label, Response, RichText, TextEdit, Ui, Vec2, Widget, WidgetText};
 // use egui_flex::{item, Flex, FlexAlign, FlexAlignContent, FlexDirection, FlexItem, FlexJustify};
 // use egui_form::{EguiValidationReport, Form, FormField};
 // use egui_form::garde::{field_path, GardeReport};
@@ -123,6 +123,9 @@ impl<'a> Tab<Context<'a>> for NewTab {
                             })
                             .add(|tui|{
 
+                                //
+                                // Name field
+                                //
                                 tui
                                     .style(Style {
                                         ..default_style()
@@ -160,12 +163,16 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         });
                                 }
 
+                                //
+                                // Directory field
+                                //
+
                                 tui
                                     .style(Style {
                                         ..default_style()
                                     })
                                     .add(|tui| {
-                                        tui.label("Directory")
+                                        tui.label(tr!("form-new-directory"))
                                     });
 
                                     tui
@@ -210,6 +217,75 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                             tui.label(RichText::new("example error message").color(colors::ERROR))
                                         });
                                 }
+
+                                //
+                                // Kind field
+                                //
+
+                                tui
+                                    .style(Style {
+                                        ..default_style()
+                                    })
+                                    .add(|tui| {
+                                        tui.label(tr!("form-new-kind"));
+                                    });
+
+                                tui
+                                    .style(Style {
+                                        flex_grow: 1.0,
+                                        ..default_style()
+                                    })
+                                    .add(|tui| {
+                                        tui.ui_add_manual(|ui| {
+                                            // FIXME combo box does not scale with container
+
+                                            let available_size = ui.available_size();
+
+                                            ui.add_sized(available_size, |ui: &mut Ui|{
+
+                                                let kind_id = ui.id();
+                                                egui::ComboBox::from_id_salt(kind_id)
+                                                    .width(ui.available_width())
+                                                    .selected_text(match self.fields.kind {
+                                                        None => tr!("form-common-combo-default"),
+                                                        Some(NewDocumentKind::Text) => tr!("form-new-kind-text"),
+                                                        Some(NewDocumentKind::Image) => tr!("form-new-kind-image"),
+                                                    })
+                                                    .show_ui(ui, |ui| {
+                                                        if ui
+                                                            .add(egui::SelectableLabel::new(
+                                                                self.fields.kind == Some(NewDocumentKind::Image),
+                                                                tr!("form-new-kind-image"),
+                                                            ))
+                                                            .clicked()
+                                                        {
+                                                            self.fields.kind = Some(NewDocumentKind::Image)
+                                                        }
+                                                        if ui
+                                                            .add(egui::SelectableLabel::new(
+                                                                self.fields.kind == Some(NewDocumentKind::Text),
+                                                                tr!("form-new-kind-text"),
+                                                            ))
+                                                            .clicked()
+                                                        {
+                                                            self.fields.kind = Some(NewDocumentKind::Text)
+                                                        }
+                                                    }).response
+                                                })
+                                        }, no_transform);
+                                    });
+
+                                if true {
+                                    tui
+                                        .style(Style {
+                                            grid_column: span(2),
+                                            ..default_style()
+                                        })
+                                        .add(|tui| {
+                                            tui.label(RichText::new("example error message").color(colors::ERROR))
+                                        });
+                                }
+
                             });
                 });
 

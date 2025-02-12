@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use eframe::emath::Align2;
 use eframe::epaint::FontFamily;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Button, Frame, Label, RichText, TextEdit, Ui, WidgetText};
+use egui::{Button, Frame, Label, RichText, TextEdit, Ui, Widget, WidgetText};
 // use egui_flex::{item, Flex, FlexAlign, FlexAlignContent, FlexDirection, FlexItem, FlexJustify};
 // use egui_form::{EguiValidationReport, Form, FormField};
 // use egui_form::garde::{field_path, GardeReport};
@@ -170,7 +170,14 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                         flex_grow: 1.0,
                                                         ..default_style()
                                                     })
-                                                    .ui_add(egui::TextEdit::singleline(&mut text));
+                                                    .ui_add_manual(|ui| {
+                                                        egui::TextEdit::singleline(&mut text).desired_width(ui.available_width()).ui(ui)
+                                                    }, |mut val, _ui| {
+                                                        // TextEdit can grow in both dimensions
+                                                        val.max_size = val.min_size;
+                                                        val.infinite = egui::Vec2b::FALSE;
+                                                        val
+                                                    });
 
                                                 tui
                                                     .style(Style {

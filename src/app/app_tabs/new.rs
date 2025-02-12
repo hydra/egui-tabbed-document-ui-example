@@ -165,7 +165,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                 display: Display::Flex,
                                                 align_content: Some(AlignContent::Stretch),
                                                 flex_grow: 1.0,
-                                                ..default_style()
+                                                ..no_padding_style()
                                             })
                                             .add(|tui| {
 

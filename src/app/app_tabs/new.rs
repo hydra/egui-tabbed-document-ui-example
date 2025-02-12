@@ -263,11 +263,15 @@ impl<'a> Tab<Context<'a>> for NewTab {
                             });
                 });
 
-                tui
+                if tui
                     .style(Style {
                         ..default_style()
                     })
-                    .ui_add(egui::Button::new("Submit"));
+                    .ui_add(Button::new("Submit"))
+                    .clicked() {
+                    self.on_submit();
+                }
+
             });
 
 

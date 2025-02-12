@@ -104,6 +104,9 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                 grid_template_columns: vec![fit_content(percent(1.)), fr(1.)],
                                 grid_template_rows: vec![fr(1.), fr(1.)],
 
+                                // ensure items are centered vertically on rows
+                                align_items: Some(AlignItems::Center),
+
                                 // Stretch grid cells by default to fill space
                                 //align_items: Some(taffy::AlignItems::Stretch),
                                 //justify_items: Some(taffy::AlignItems::Stretch),

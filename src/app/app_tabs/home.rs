@@ -1,11 +1,11 @@
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Checkbox, FontFamily, Frame, Label, RichText, Ui, Widget, WidgetText};
+use egui::{Checkbox, FontFamily, RichText, Ui, WidgetText};
 //use egui_flex::{item, Flex, FlexAlign, FlexDirection, FlexItem, FlexJustify};
 use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
-use egui_taffy::taffy::{AlignItems, Style};
+use egui_taffy::taffy::{Style};
 use egui_taffy::{taffy, tui, TuiBuilderLogic};
-use egui_taffy::taffy::prelude::{auto, length, percent};
+use egui_taffy::taffy::prelude::{length, percent};
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
 

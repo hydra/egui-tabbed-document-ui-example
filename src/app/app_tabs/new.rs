@@ -1,8 +1,9 @@
 use std::path::PathBuf;
 use eframe::emath::Align2;
 use eframe::epaint::FontFamily;
+use eframe::glow::RED;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Button, Frame, Label, Response, RichText, TextEdit, Ui, Widget, WidgetText};
+use egui::{Button, Color32, Frame, Label, Response, RichText, TextEdit, Ui, Widget, WidgetText};
 // use egui_flex::{item, Flex, FlexAlign, FlexAlignContent, FlexDirection, FlexItem, FlexJustify};
 // use egui_form::{EguiValidationReport, Form, FormField};
 // use egui_form::garde::{field_path, GardeReport};
@@ -16,6 +17,11 @@ use serde::{Deserialize, Serialize};
 use crate::context::Context;
 use crate::file_picker::Picker;
 
+mod colors {
+    use egui::Color32;
+
+    pub const ERROR: Color32 = Color32::from_rgb(0xcb, 0x63, 0x5d);
+}
 #[derive(Default, Deserialize, Serialize)]
 pub struct NewTab {
     fields: NewTabForm,
@@ -122,7 +128,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         ..default_style()
                                     })
                                     .add(|tui| {
-                                        tui.label("left")
+                                        tui.label(tr!("form-new-name"));
                                     });
 
                                 tui
@@ -131,24 +137,35 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         ..default_style()
                                     })
                                     .add(|tui| {
-                                        tui.label("right")
+                                        // NOTE text input does not resize with grid cell when using `.ui_add`, known issue - https://discord.com/channels/900275882684477440/904461220592119849/1338883750922293319
+                                        //      as a workaround we use `ui_add_manual` for now, with `no_transform`.
+                                        tui
+                                            .style(Style {
+                                                flex_grow: 1.0,
+                                                ..default_style()
+                                            })
+                                            .ui_add_manual(|ui| {
+                                                TextEdit::singleline(&mut self.fields.name).desired_width(ui.available_width()).ui(ui)
+                                            }, no_transform);
                                     });
+
+                                if true {
+                                    tui
+                                        .style(Style {
+                                            grid_column: span(2),
+                                            ..default_style()
+                                        })
+                                        .add(|tui| {
+                                            tui.label(RichText::new("example error message").color(colors::ERROR))
+                                        });
+                                }
 
                                 tui
                                     .style(Style {
-                                        grid_column: span(2),
                                         ..default_style()
                                     })
                                     .add(|tui| {
-                                        tui.label("spanned")
-                                    });
-
-                                tui
-                                    .style(Style {
-                                        ..default_style()
-                                    })
-                                    .add(|tui| {
-                                        tui.label("left (longer)")
+                                        tui.label("Directory")
                                     });
 
                                     tui
@@ -168,7 +185,11 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                     ..default_style()
                                                 })
                                                 .ui_add_manual(|ui| {
-                                                    TextEdit::singleline(&mut text).desired_width(ui.available_width()).ui(ui)
+                                                    let mut chosen_directory = self.fields.directory.as_ref().map_or("".to_string(), |path|path.display().to_string());
+                                                    TextEdit::singleline(&mut chosen_directory)
+                                                        .desired_width(ui.available_width())
+                                                        .interactive(false)
+                                                        .ui(ui)
                                                 }, no_transform);
 
                                             tui
@@ -179,14 +200,16 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                 .ui_add(Button::new("..."));
                                         });
 
-                                tui
-                                    .style(Style {
-                                        grid_column: span(2),
-                                        ..default_style()
-                                    })
-                                    .add(|tui| {
-                                        tui.label("spanned")
-                                    });
+                                if true {
+                                    tui
+                                        .style(Style {
+                                            grid_column: span(2),
+                                            ..default_style()
+                                        })
+                                        .add(|tui| {
+                                            tui.label(RichText::new("example error message").color(colors::ERROR))
+                                        });
+                                }
                             });
                 });
 

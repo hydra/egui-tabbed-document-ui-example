@@ -154,46 +154,39 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         tui.label("left (longer)")
                                     });
 
-                                tui
-                                    .style(Style {
-                                        flex_grow: 1.0,
-                                        ..no_padding_style()
-                                    })
-                                    .add(|tui| {
-                                        tui
-                                            .style(Style {
-                                                display: Display::Flex,
-                                                align_content: Some(AlignContent::Stretch),
-                                                flex_grow: 1.0,
-                                                ..no_padding_style()
-                                            })
-                                            .add(|tui| {
+                                    tui
+                                        .style(Style {
+                                            display: Display::Flex,
+                                            align_content: Some(AlignContent::Stretch),
+                                            flex_grow: 1.0,
+                                            ..no_padding_style()
+                                        })
+                                        .add(|tui| {
 
-                                                // NOTE text input does not resize with grid cell, known issue - https://discord.com/channels/900275882684477440/904461220592119849/1338883750922293319
-                                                //      as a workaround we use `ui_add_manual` for now.
-                                                //      transform closure borrowed from egui_wigets.rs from the `impl TuiWidget for egui::Button<'_>` implementation.
-                                                tui
-                                                    .style(Style {
-                                                        flex_grow: 1.0,
-                                                        ..default_style()
-                                                    })
-                                                    .ui_add_manual(|ui| {
-                                                        egui::TextEdit::singleline(&mut text).desired_width(ui.available_width()).ui(ui)
-                                                    }, |mut val, _ui| {
-                                                        // TextEdit can grow in both dimensions
-                                                        val.max_size = val.min_size;
-                                                        val.infinite = egui::Vec2b::FALSE;
-                                                        val
-                                                    });
+                                            // NOTE text input does not resize with grid cell, known issue - https://discord.com/channels/900275882684477440/904461220592119849/1338883750922293319
+                                            //      as a workaround we use `ui_add_manual` for now.
+                                            //      transform closure borrowed from egui_wigets.rs from the `impl TuiWidget for egui::Button<'_>` implementation.
+                                            tui
+                                                .style(Style {
+                                                    flex_grow: 1.0,
+                                                    ..default_style()
+                                                })
+                                                .ui_add_manual(|ui| {
+                                                    egui::TextEdit::singleline(&mut text).desired_width(ui.available_width()).ui(ui)
+                                                }, |mut val, _ui| {
+                                                    // TextEdit can grow in both dimensions
+                                                    val.max_size = val.min_size;
+                                                    val.infinite = egui::Vec2b::FALSE;
+                                                    val
+                                                });
 
-                                                tui
-                                                    .style(Style {
-                                                        flex_grow: 0.0,
-                                                        ..default_style()
-                                                    })
-                                                    .ui_add(Button::new("..."));
-                                            });
-                                    });
+                                            tui
+                                                .style(Style {
+                                                    flex_grow: 0.0,
+                                                    ..default_style()
+                                                })
+                                                .ui_add(Button::new("..."));
+                                        });
 
                                 tui
                                     .style(Style {

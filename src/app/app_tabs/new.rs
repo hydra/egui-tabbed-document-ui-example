@@ -68,6 +68,12 @@ impl<'a> Tab<Context<'a>> for NewTab {
             ..Default::default()
         };
 
+        let no_padding_style = || Style {
+            padding: length(0.),
+            gap: length(0.),
+            ..Default::default()
+        };
+
         tui(ui, ui.id().with("new"))
             .reserve_available_width()
             .style(Style {
@@ -92,7 +98,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                         //justify_content: Some(taffy::JustifyContent::Stretch),
                         ..default_style()
                     })
-                    .add_with_border(|tui|{
+                    .add(|tui|{
 
                         //
                         // Grid container
@@ -112,13 +118,13 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                 //justify_items: Some(taffy::AlignItems::Stretch),
                                 ..default_style()
                             })
-                            .add_with_border(|tui|{
+                            .add(|tui|{
 
                                 tui
                                     .style(Style {
                                         ..default_style()
                                     })
-                                    .add_with_border(|tui| {
+                                    .add(|tui| {
                                         tui.label("left")
                                     });
 
@@ -127,7 +133,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         flex_grow: 1.0,
                                         ..default_style()
                                     })
-                                    .add_with_border(|tui| {
+                                    .add(|tui| {
                                         tui.label("right")
                                     });
 
@@ -136,7 +142,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         grid_column: span(2),
                                         ..default_style()
                                     })
-                                    .add_with_border(|tui| {
+                                    .add(|tui| {
                                         tui.label("spanned")
                                     });
 
@@ -144,18 +150,16 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                     .style(Style {
                                         ..default_style()
                                     })
-                                    .add_with_border(|tui| {
+                                    .add(|tui| {
                                         tui.label("left (longer)")
                                     });
 
                                 tui
                                     .style(Style {
                                         flex_grow: 1.0,
-                                        ..default_style()
+                                        ..no_padding_style()
                                     })
-                                    .add_with_border(|tui| {
-
-                                        // FIXME text input does not resize with grid cell, known issue - https://discord.com/channels/900275882684477440/904461220592119849/1338883750922293319
+                                    .add(|tui| {
                                         tui
                                             .style(Style {
                                                 display: Display::Flex,
@@ -163,8 +167,11 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                 flex_grow: 1.0,
                                                 ..default_style()
                                             })
-                                            .add_with_border(|tui| {
+                                            .add(|tui| {
 
+                                                // NOTE text input does not resize with grid cell, known issue - https://discord.com/channels/900275882684477440/904461220592119849/1338883750922293319
+                                                //      as a workaround we use `ui_add_manual` for now.
+                                                //      transform closure borrowed from egui_wigets.rs from the `impl TuiWidget for egui::Button<'_>` implementation.
                                                 tui
                                                     .style(Style {
                                                         flex_grow: 1.0,
@@ -193,7 +200,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         grid_column: span(2),
                                         ..default_style()
                                     })
-                                    .add_with_border(|tui| {
+                                    .add(|tui| {
                                         tui.label("spanned")
                                     });
                             });

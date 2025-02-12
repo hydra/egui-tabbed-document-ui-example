@@ -2,7 +2,7 @@ use std::path::PathBuf;
 use eframe::emath::Align2;
 use eframe::epaint::FontFamily;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Button, Frame, Label, RichText, TextEdit, Ui, Widget, WidgetText};
+use egui::{Button, Frame, Label, Response, RichText, TextEdit, Ui, Widget, WidgetText};
 // use egui_flex::{item, Flex, FlexAlign, FlexAlignContent, FlexDirection, FlexItem, FlexJustify};
 // use egui_form::{EguiValidationReport, Form, FormField};
 // use egui_form::garde::{field_path, GardeReport};
@@ -10,7 +10,7 @@ use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent, span};
 use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, FlexDirection, JustifyContent, JustifyItems, JustifySelf, Size, Style};
-use egui_taffy::{taffy, tui, TuiBuilderLogic};
+use egui_taffy::{taffy, tui, TuiBuilderLogic, TuiContainerResponse};
 use garde::Validate;
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
@@ -160,22 +160,16 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         })
                                         .add(|tui| {
 
-                                            // NOTE text input does not resize with grid cell, known issue - https://discord.com/channels/900275882684477440/904461220592119849/1338883750922293319
-                                            //      as a workaround we use `ui_add_manual` for now.
-                                            //      transform closure borrowed from egui_wigets.rs from the `impl TuiWidget for egui::Button<'_>` implementation.
+                                            // NOTE text input does not resize with grid cell when using `.ui_add`, known issue - https://discord.com/channels/900275882684477440/904461220592119849/1338883750922293319
+                                            //      as a workaround we use `ui_add_manual` for now, with `no_transform`.
                                             tui
                                                 .style(Style {
                                                     flex_grow: 1.0,
                                                     ..default_style()
                                                 })
                                                 .ui_add_manual(|ui| {
-                                                    egui::TextEdit::singleline(&mut text).desired_width(ui.available_width()).ui(ui)
-                                                }, |mut val, _ui| {
-                                                    // TextEdit can grow in both dimensions
-                                                    val.max_size = val.min_size;
-                                                    val.infinite = egui::Vec2b::FALSE;
-                                                    val
-                                                });
+                                                    TextEdit::singleline(&mut text).desired_width(ui.available_width()).ui(ui)
+                                                }, no_transform);
 
                                             tui
                                                 .style(Style {
@@ -396,4 +390,9 @@ impl NewTab {
     fn on_submit(&mut self) {
         println!("Submitted: {:?}", self.fields);
     }
+
+}
+
+fn no_transform(value: TuiContainerResponse<Response>, _ui: &Ui) -> TuiContainerResponse<Response> {
+    value
 }

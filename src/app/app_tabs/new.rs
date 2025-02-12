@@ -11,8 +11,8 @@ use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent, span};
 use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, FlexDirection, JustifyContent, JustifyItems, JustifySelf, Size, Style};
-use egui_taffy::{taffy, tui, TuiBuilderLogic, TuiContainerResponse};
-use garde::Validate;
+use egui_taffy::{taffy, tui, Tui, TuiBuilderLogic, TuiContainerResponse};
+use garde::{Path, Report, Validate};
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
 use crate::file_picker::Picker;
@@ -56,12 +56,11 @@ impl<'a> Tab<Context<'a>> for NewTab {
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, _context: &mut Context<'a>) {
 
-        let mut text = "text".to_string();
-
         if let Ok(picked_directory) = self.file_picker.picked() {
             self.fields.directory = Some(picked_directory);
         }
 
+        let validation_result = self.fields.validate();
 
         ui.ctx().style_mut(|style| {
             // if this is not done, text in labels/checkboxes/etc wraps
@@ -152,16 +151,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                             }, no_transform);
                                     });
 
-                                if true {
-                                    tui
-                                        .style(Style {
-                                            grid_column: span(2),
-                                            ..default_style()
-                                        })
-                                        .add(|tui| {
-                                            tui.label(RichText::new("example error message").color(colors::ERROR))
-                                        });
-                                }
+                                Self::field_error(&validation_result, default_style, tui, "name");
 
                                 //
                                 // Directory field
@@ -207,16 +197,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                 .ui_add(Button::new("..."));
                                         });
 
-                                if true {
-                                    tui
-                                        .style(Style {
-                                            grid_column: span(2),
-                                            ..default_style()
-                                        })
-                                        .add(|tui| {
-                                            tui.label(RichText::new("example error message").color(colors::ERROR))
-                                        });
-                                }
+                                Self::field_error(&validation_result, default_style, tui, "directory");
 
                                 //
                                 // Kind field
@@ -275,17 +256,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                         }, no_transform);
                                     });
 
-                                if true {
-                                    tui
-                                        .style(Style {
-                                            grid_column: span(2),
-                                            ..default_style()
-                                        })
-                                        .add(|tui| {
-                                            tui.label(RichText::new("example error message").color(colors::ERROR))
-                                        });
-                                }
-
+                                Self::field_error(&validation_result, default_style, tui, "kind");
                             });
                 });
 
@@ -490,6 +461,20 @@ impl NewTab {
         println!("Submitted: {:?}", self.fields);
     }
 
+    fn field_error(validation_result: &Result<(), Report>, default_style: fn() -> Style, tui: &mut Tui, field_path: &str) {
+        if let Err(errors) = validation_result {
+            if let Some((_path, error)) = errors.iter().find(|(path, error)| path.eq(&Path::new(field_path))) {
+                tui
+                    .style(Style {
+                        grid_column: span(2),
+                        ..default_style()
+                    })
+                    .add(|tui| {
+                        tui.label(RichText::new(error.message()).color(colors::ERROR))
+                    });
+            }
+        }
+    }
 }
 
 fn no_transform(value: TuiContainerResponse<Response>, _ui: &Ui) -> TuiContainerResponse<Response> {

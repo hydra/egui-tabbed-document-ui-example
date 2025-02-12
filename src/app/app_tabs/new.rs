@@ -189,12 +189,15 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                         .ui(ui)
                                                 }, no_transform);
 
-                                            tui
+                                            if tui
                                                 .style(Style {
                                                     flex_grow: 0.0,
                                                     ..default_style()
                                                 })
-                                                .ui_add(Button::new("..."));
+                                                .ui_add(Button::new("..."))
+                                                .clicked() {
+                                                self.file_picker.pick_folder()
+                                            }
                                         });
 
                                 Self::field_error(&validation_result, default_style, tui, "directory");

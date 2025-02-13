@@ -158,7 +158,7 @@ impl TemplateApp {
     fn add_new_tab(&mut self) {
         let sender = self.state().sender.clone();
         // create a new 'new' tab
-        let tab_id = self.tabs.add(TabKind::New(NewTab::init(sender)));
+        let tab_id = self.tabs.add(TabKind::New(NewTab::default()));
         self.tree.push_to_focused_leaf(tab_id);
     }
 
@@ -252,8 +252,11 @@ impl eframe::App for TemplateApp {
             }
         }
 
+        let sender = &self.state().sender.clone();
+
         let mut context = Context {
             config: &mut self.config,
+            sender,
         };
 
         let mut my_tab_viewer = MyTabViewer {

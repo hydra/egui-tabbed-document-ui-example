@@ -1,4 +1,3 @@
-use std::mem::MaybeUninit;
 use std::path::PathBuf;
 use std::sync::mpsc::Sender;
 use crate::app::tabs::{Tab, TabKey};
@@ -20,25 +19,12 @@ mod colors {
     pub const ERROR: Color32 = Color32::from_rgb(0xcb, 0x63, 0x5d);
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Default, Deserialize, Serialize)]
 pub struct NewTab {
     fields: NewTabForm,
 
     #[serde(skip)]
     file_picker: Picker,
-
-    #[serde(skip)]
-    sender: Option<Sender<AppMessage>>,
-}
-
-impl NewTab {
-    pub fn init(sender: Sender<AppMessage>) -> Self {
-        Self {
-            fields: Default::default(),
-            file_picker: Default::default(),
-            sender: Some(sender),
-        }
-    }
 }
 
 // FIXME form errors do not use i18n
@@ -274,7 +260,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                     })
                     .ui_add(Button::new("Submit"))
                     .clicked() {
-                    self.on_submit();
+                    self.on_submit(_context.sender);
                 }
 
             });
@@ -282,7 +268,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
 }
 
 impl NewTab {
-    fn on_submit(&mut self) {
+    fn on_submit(&mut self, sender: &Sender<AppMessage>) {
         println!("Submitted: {:?}", self.fields);
 
         if !self.fields.validate().is_ok() {
@@ -295,7 +281,7 @@ impl NewTab {
             kind: self.fields.kind.as_ref().unwrap().clone(),
         };
 
-        self.sender.as_ref().unwrap().send(AppMessage::CreateDocument(args)).unwrap()
+        sender.send(AppMessage::CreateDocument(args)).unwrap()
     }
 
     fn field_error(validation_errors: &Result<(), ValidationErrors>, default_style: fn() -> Style, tui: &mut Tui, field_name: &str) {

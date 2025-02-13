@@ -13,4 +13,11 @@ impl TextDocument {
             content: None
         }
     }
+
+    pub fn from_path(path: PathBuf) -> Self {
+        Self {
+            path,
+            content: None
+        }
+    }
 }

@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use crate::app::tabs::{Tab, TabKey};
 use egui::{Ui, WidgetText};
 use serde::{Deserialize, Serialize};
@@ -7,6 +8,7 @@ use crate::documents::DocumentKey;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DocumentTab {
     title: String,
+    pub path: PathBuf,
     pub document_key: DocumentKey,
 }
 
@@ -16,7 +18,7 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
     }
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, _context: &mut Context<'a>) {
-        ui.label(format!("title: {:?}, key: {:?}", self.title, self.document_key));
+        ui.label(format!("path: {:?}, key: {:?}", self.path, self.document_key));
 
         // get the document, this will fail if the document has not been restored on application startup.
 
@@ -35,9 +37,10 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
 }
 
 impl DocumentTab {
-    pub fn new(title: String, document_key: DocumentKey) -> Self {
+    pub fn new(title: String, path: PathBuf, document_key: DocumentKey) -> Self {
         Self {
             title,
+            path,
             document_key,
         }
     }

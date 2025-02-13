@@ -123,8 +123,6 @@ impl TemplateApp {
         instance.state.write(AppState::init());
         // Safety: `Self::state()` is now safe to call.
 
-        // FIXME somehow, somewhere, we have to load the documents that were previously loaded
-
         instance
     }
 
@@ -185,12 +183,12 @@ impl TemplateApp {
 
                 let title = path.file_name().unwrap().to_string_lossy().to_string();
 
-                let text_document = TextDocument::create_new(path);
+                let text_document = TextDocument::create_new(path.clone());
                 let document = DocumentKind::TextDocument(text_document);
 
                 let document_key= self.state().documents.lock().unwrap().insert(document);
 
-                let tab_id = self.tabs.add(TabKind::Document(DocumentTab::new(title, document_key)));
+                let tab_id = self.tabs.add(TabKind::Document(DocumentTab::new(title, path, document_key)));
                 self.tree.push_to_focused_leaf(tab_id);
 
             }
@@ -269,6 +267,35 @@ impl eframe::App for TemplateApp {
                 if let Some(home_tab_key) = self.find_home_tab() {
                     let find_result = self.tree.find_tab(home_tab_key).unwrap();
                     self.tree.remove_tab(find_result);
+                }
+            }
+
+            let stuff = self.tabs.iter_mut().find_map(|(tab_key, tab_kind)| {
+                match tab_kind {
+                    TabKind::Document(document_tab) => {
+
+                        let path = document_tab.path.clone();
+                        let extension = path.extension().unwrap().to_str().unwrap();
+
+                        const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
+
+                        if SUPPORTED_TEXT_EXTENSIONS.contains(&extension) {
+                            let text_document = TextDocument::from_path(path.clone());
+                            let document = DocumentKind::TextDocument(text_document);
+
+                            Some((tab_key, document))
+                        } else {
+                            todo!()
+                        }
+                    }
+                    _ => None
+                }
+            });
+
+            for (tab_key, document) in stuff {
+                let new_key = self.state().documents.lock().unwrap().insert(document);
+                if let TabKind::Document(mut document_tab) = self.tabs.get(tab_key).unwrap() {
+                    document_tab.document_key = new_key;
                 }
             }
         }

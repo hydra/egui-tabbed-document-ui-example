@@ -1,3 +1,4 @@
+use std::collections::btree_map::{Iter, IterMut};
 use crate::app::app_tabs::TabKind;
 use egui::{Id, Ui, WidgetText};
 use egui_dock::TabViewer;
@@ -37,11 +38,23 @@ impl Tabs {
         self.tabs.get(key)
     }
 
+    pub fn get_mut(&mut self, key: &TabKey) -> Option<&mut TabKind> {
+        self.tabs.get_mut(key)
+    }
+
     pub fn new() -> Tabs {
         Self {
             next_id: 0,
             tabs: BTreeMap::default(),
         }
+    }
+
+    pub fn iter(&self) -> Iter<TabKey, TabKind> {
+        self.tabs.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> IterMut<TabKey, TabKind> {
+        self.tabs.iter_mut()
     }
 }
 

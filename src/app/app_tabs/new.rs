@@ -1,18 +1,15 @@
 use std::path::PathBuf;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Button, Response, RichText, TextBuffer, TextEdit, Ui, Widget, WidgetText};
-use egui_i18n::{fluent, tr, translate_fluent};
+use egui::{Button, Response, RichText, TextEdit, Ui, Widget, WidgetText};
+use egui_i18n::{tr, translate_fluent};
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent, span};
 use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, FlexDirection, Style};
 use egui_taffy::{taffy, tui, Tui, TuiBuilderLogic, TuiContainerResponse};
-use fluent_bundle::FluentValue;
-use fluent_bundle::types::{FluentNumber, FluentNumberOptions};
-use log::warn;
 use serde::{Deserialize, Serialize};
-use serde_json::{Number, Value};
 use validator::{Validate, ValidationErrors};
 use crate::context::Context;
 use crate::file_picker::Picker;
+use crate::i18n::fluent_argument_helpers;
 
 mod colors {
     use egui::Color32;
@@ -293,36 +290,7 @@ impl NewTab {
                             let code = &field_error.code;
                             let params = &field_error.params;
 
-                            let mut args = fluent::FluentArgs::new();
-                            for (key, value) in params.iter() {
-                                match value {
-                                    Value::Null => {
-                                        warn!("encountered null value for field: {}", key);
-                                    },
-                                    Value::Bool(_) => todo!(),
-                                    Value::Number(number) => {
-                                        // TODO make sure this is correct!  perhaps write some integration tests to prove the conversion is correct.
-                                        if number.is_f64() {
-                                            let value = FluentValue::Number(FluentNumber::new(number.as_f64().unwrap(), FluentNumberOptions::default()));
-                                            args.set(key.as_str(), value);
-                                        } else if number.is_i64() {
-                                            let value = FluentValue::Number(FluentNumber::new(number.as_i64().unwrap() as f64, FluentNumberOptions::default()));
-                                            args.set(key.as_str(), value);
-                                        } else if number.is_u64() {
-                                            let value = FluentValue::Number(FluentNumber::new(number.as_u64().unwrap() as f64, FluentNumberOptions::default()));
-                                            args.set(key.as_str(), value);
-                                        } else {
-                                            unreachable!()
-                                        }
-                                    },
-                                    Value::String(string) => {
-                                        let value = FluentValue::String(string.into());
-                                        args.set(key.as_str(), value);
-                                    },
-                                    Value::Array(_) => todo!(),
-                                    Value::Object(_) => todo!(),
-                                }
-                            }
+                            let args = fluent_argument_helpers::build_fluent_args(params);
 
                             let message = translate_fluent(code, &args);
 

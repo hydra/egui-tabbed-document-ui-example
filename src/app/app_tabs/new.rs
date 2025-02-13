@@ -1,11 +1,10 @@
 use std::path::PathBuf;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Button, Response, RichText, TextEdit, Ui, Widget, WidgetText};
+use egui::{Button, Response, TextEdit, Ui, Widget, WidgetText};
 use egui_i18n::tr;
-use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent, span};
+use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent};
 use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, FlexDirection, Style};
-use egui_taffy::{taffy, tui, Tui, TuiBuilderLogic, TuiContainerResponse};
-use garde::{Path, Report, Validate};
+use egui_taffy::{taffy, tui, TuiBuilderLogic, TuiContainerResponse};
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
 use crate::file_picker::Picker;
@@ -15,6 +14,7 @@ mod colors {
 
     pub const ERROR: Color32 = Color32::from_rgb(0xcb, 0x63, 0x5d);
 }
+
 #[derive(Default, Deserialize, Serialize)]
 pub struct NewTab {
     fields: NewTabForm,
@@ -24,15 +24,12 @@ pub struct NewTab {
 }
 
 // FIXME form errors do not use i18n
-#[derive(Clone, Debug, Default, Validate, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 struct NewTabForm {
-    #[garde(length(min = 1))]
     name: String,
 
-    #[garde(required)]
     kind: Option<NewDocumentKind>,
 
-    #[garde(required)]
     directory: Option<PathBuf>
 }
 
@@ -52,8 +49,6 @@ impl<'a> Tab<Context<'a>> for NewTab {
         if let Ok(picked_directory) = self.file_picker.picked() {
             self.fields.directory = Some(picked_directory);
         }
-
-        let validation_result = self.fields.validate();
 
         ui.ctx().style_mut(|style| {
             // if this is not done, text in labels/checkboxes/etc wraps
@@ -144,8 +139,6 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                             }, no_transform);
                                     });
 
-                                Self::field_error(&validation_result, default_style, tui, "name");
-
                                 //
                                 // Directory field
                                 //
@@ -192,8 +185,6 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                 self.file_picker.pick_folder()
                                             }
                                         });
-
-                                Self::field_error(&validation_result, default_style, tui, "directory");
 
                                 //
                                 // Kind field
@@ -251,8 +242,6 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                 })
                                         }, no_transform);
                                     });
-
-                                Self::field_error(&validation_result, default_style, tui, "kind");
                             });
                 });
 
@@ -272,21 +261,6 @@ impl<'a> Tab<Context<'a>> for NewTab {
 impl NewTab {
     fn on_submit(&mut self) {
         println!("Submitted: {:?}", self.fields);
-    }
-
-    fn field_error(validation_result: &Result<(), Report>, default_style: fn() -> Style, tui: &mut Tui, field_path: &str) {
-        if let Err(errors) = validation_result {
-            if let Some((_path, error)) = errors.iter().find(|(path, _error)| path.eq(&Path::new(field_path))) {
-                tui
-                    .style(Style {
-                        grid_column: span(2),
-                        ..default_style()
-                    })
-                    .add(|tui| {
-                        tui.label(RichText::new(error.message()).color(colors::ERROR))
-                    });
-            }
-        }
     }
 }
 

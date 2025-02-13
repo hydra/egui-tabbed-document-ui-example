@@ -32,7 +32,6 @@ egui_material_icons = { git = "https://github.com/lucasmerlin/hello_egui.git", t
 #egui_form = { path = "../hello_egui/crates/egui_form", features = ["validator_garde"] }
 
 egui_taffy = "0.7.0"
-garde = { version = "0.22.0", features = ["derive", "serde"]}
 rfd = "0.15.2"
 
 log = "0.4.22"

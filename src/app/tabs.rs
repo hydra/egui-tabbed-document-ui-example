@@ -69,12 +69,12 @@ pub trait Tab<App> {
     fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, app: &mut App);
 }
 
-pub struct MyTabViewer<'a> {
+pub struct AppTabViewer<'a> {
     pub tabs: &'a mut Tabs,
     pub context: &'a mut Context<'a>,
 }
 
-impl<'a> TabViewer for MyTabViewer<'a> {
+impl<'a> TabViewer for AppTabViewer<'a> {
     type Tab = TabKey;
 
     fn id(&mut self, tab: &mut Self::Tab) -> Id {

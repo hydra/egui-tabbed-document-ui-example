@@ -94,6 +94,8 @@ impl<'a> TabViewer for AppTabViewer<'a> {
     }
 
     fn on_close(&mut self, tab: &mut Self::Tab) -> bool {
+        // FIXME this isn't called when the 'close all' button in the tab bar is used.
+        //       reported to maintainer - https://discord.com/channels/900275882684477440/1075333382290026567/1339624259697246348
         debug!("closing tab, id: {:?}", tab);
         let _removed = self.tabs.tabs.remove(tab);
 

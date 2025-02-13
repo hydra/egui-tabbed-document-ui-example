@@ -205,6 +205,58 @@ impl TemplateApp {
     fn state(&mut self) -> &mut AppState {
         unsafe { self.state.assume_init_mut() }
     }
+
+    /// Safety: call only once on startup, before the tabs are shown.
+    fn show_home_tab_on_startup(&mut self) {
+        if self.config.show_home_tab_on_startup {
+            self.show_home_tab();
+        } else {
+            if let Some(home_tab_key) = self.find_home_tab() {
+                let find_result = self.tree.find_tab(home_tab_key).unwrap();
+                self.tree.remove_tab(find_result);
+            }
+        }
+    }
+
+    /// when the app starts up, the documents will be empty, and the document tabs will have keys that don't exist
+    /// in the documents list (because it's empty now).
+    /// we have to find these tabs, create documents, store them in the map and replace the tab's document key
+    /// with the new key generated when adding the key to the map
+    ///
+    /// Safety: call only once on startup, before the tabs are shown.
+    fn restore_documents_on_startup(&mut self) {
+        // we have to do this as a two-step process to above borrow-checker issues
+
+        // step 1 - find the document tabs and create corresponding documents, return the tab keys and documents.
+        let documents_for_tabs = self.tabs.iter_mut().filter_map(|(tab_key, tab_kind)| {
+            match tab_kind {
+                TabKind::Document(document_tab) => {
+                    let path = document_tab.path.clone();
+                    let extension = path.extension().unwrap().to_str().unwrap();
+
+                    const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
+
+                    if SUPPORTED_TEXT_EXTENSIONS.contains(&extension) {
+                        let text_document = TextDocument::from_path(path.clone());
+                        let document = DocumentKind::TextDocument(text_document);
+
+                        Some((tab_key.clone(), document))
+                    } else {
+                        todo!()
+                    }
+                }
+                _ => None
+            }
+        }).collect::<Vec<_>>();
+
+        // step 2 - store the documents and update the document key for the tab.
+        for (tab_key, document) in documents_for_tabs {
+            let new_key = self.state().documents.lock().unwrap().insert(document);
+            if let TabKind::Document(ref mut document_tab) = self.tabs.get_mut(&tab_key).unwrap() {
+                document_tab.document_key = new_key;
+            }
+        }
+    }
 }
 
 impl eframe::App for TemplateApp {
@@ -261,51 +313,8 @@ impl eframe::App for TemplateApp {
         if !self.state().startup_done {
             self.state().startup_done = true;
 
-            if self.config.show_home_tab_on_startup {
-                self.show_home_tab();
-            } else {
-                if let Some(home_tab_key) = self.find_home_tab() {
-                    let find_result = self.tree.find_tab(home_tab_key).unwrap();
-                    self.tree.remove_tab(find_result);
-                }
-            }
-
-            // when the app starts up, the documents will be empty, and the document tabs will have keys that don't exist
-            // in the documents list (because it's empty now).
-            // we have to find these tabs, create documents, store them in the map and replace the tab's document key
-            // with the new key generated when adding the key to the map
-            // we have to do this as a two-step process to above borrow-checker issues
-
-            // step 1 - find the document tabs and create corresponding documents, return the tab keys and documents.
-            let documents_for_tabs = self.tabs.iter_mut().filter_map(|(tab_key, tab_kind)| {
-                match tab_kind {
-                    TabKind::Document(document_tab) => {
-
-                        let path = document_tab.path.clone();
-                        let extension = path.extension().unwrap().to_str().unwrap();
-
-                        const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
-
-                        if SUPPORTED_TEXT_EXTENSIONS.contains(&extension) {
-                            let text_document = TextDocument::from_path(path.clone());
-                            let document = DocumentKind::TextDocument(text_document);
-
-                            Some((tab_key.clone(), document))
-                        } else {
-                            todo!()
-                        }
-                    }
-                    _ => None
-                }
-            }).collect::<Vec<_>>();
-
-            // step 2 - store the documents and update the document key for the tab.
-            for (tab_key, document) in documents_for_tabs {
-                let new_key = self.state().documents.lock().unwrap().insert(document);
-                if let TabKind::Document(ref mut document_tab) = self.tabs.get_mut(&tab_key).unwrap() {
-                    document_tab.document_key = new_key;
-                }
-            }
+            self.show_home_tab_on_startup();
+            self.restore_documents_on_startup();
         }
 
         // TODO discover whether cloning a sender is expensive or not

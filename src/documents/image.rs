@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use egui::Ui;
 use crate::context::Context;
+use crate::documents::DocumentContext;
 
 pub struct ImageDocument {
     pub path: PathBuf,
@@ -9,7 +10,7 @@ pub struct ImageDocument {
 }
 
 impl ImageDocument {
-    pub fn ui<'a>(&mut self, ui: &mut Ui, _context: &mut Context<'a>) {
+    pub fn ui<'a>(&mut self, ui: &mut Ui, _context: &mut DocumentContext<'a>) {
         ui.label("Image document");
     }
 }

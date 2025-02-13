@@ -4,7 +4,7 @@ use egui::{Ui, WidgetText};
 use log::debug;
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
-use crate::documents::{DocumentKey, DocumentKind};
+use crate::documents::{DocumentContext, DocumentKey, DocumentKind};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DocumentTab {
@@ -30,12 +30,17 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
         //      but cannot pass the context because we need to borrow the documents from the context to find
         //      out what type of document it is before we can delegate to it.
 
+        let mut document_context = DocumentContext {
+            config: _context.config,
+            sender: _context.sender.clone(),
+        };
+
         match document {
             Some(document_kind) => {
                 ui.label("loaded");
                 match document_kind {
-                    DocumentKind::TextDocument(document) => document.ui(ui, _context),
-                    DocumentKind::ImageDocument(document) => document.ui(ui, _context),
+                    DocumentKind::TextDocument(document) => document.ui(ui, &mut document_context),
+                    DocumentKind::ImageDocument(document) => document.ui(ui, &mut document_context),
                 }
             }
             None => {

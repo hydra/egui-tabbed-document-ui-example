@@ -33,4 +33,12 @@ impl<'a> Tab<Context<'a>> for TabKind {
             TabKind::New(tab) => tab.ui(ui, tab_key, context),
         }
     }
+
+    fn on_close(&mut self, tab_key: &mut TabKey, context: &mut Context<'a>) -> bool {
+        match self {
+            TabKind::Home(tab) => tab.on_close(tab_key, context),
+            TabKind::Document(tab) => tab.on_close(tab_key, context),
+            TabKind::New(tab) => tab.on_close(tab_key, context),
+        }
+    }
 }

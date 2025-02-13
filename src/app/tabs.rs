@@ -5,6 +5,7 @@ use egui_dock::TabViewer;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
+use crate::app::AppMessage;
 use crate::context::Context;
 
 #[derive(Debug, Clone, Hash, Copy, Ord, Eq, PartialOrd, PartialEq, Serialize, Deserialize)]
@@ -67,6 +68,8 @@ impl Tabs {
 pub trait Tab<App> {
     fn label(&self) -> WidgetText;
     fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, app: &mut App);
+
+    fn on_close(&mut self, tab_key: &mut TabKey, app: &mut App) -> bool { true }
 }
 
 pub struct AppTabViewer<'a> {
@@ -97,8 +100,13 @@ impl<'a> TabViewer for AppTabViewer<'a> {
         // FIXME this isn't called when the 'close all' button in the tab bar is used.
         //       reported to maintainer - https://discord.com/channels/900275882684477440/1075333382290026567/1339624259697246348
         debug!("closing tab, id: {:?}", tab);
-        let _removed = self.tabs.tabs.remove(tab);
 
-        true
+        let tab_instance = self.tabs.tabs.get_mut(tab).unwrap();
+        let allow_close = tab_instance.on_close(tab, self.context);
+        if allow_close {
+            let _removed = self.tabs.tabs.remove(tab);
+        }
+
+        allow_close
     }
 }

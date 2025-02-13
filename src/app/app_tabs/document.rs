@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use crate::app::tabs::{Tab, TabKey};
 use egui::{Ui, WidgetText};
+use log::debug;
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
 use crate::documents::DocumentKey;
@@ -33,6 +34,13 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
                 ui.label("unknown document key");
             }
         }
+    }
+
+    fn on_close(&mut self, _tab_key: &mut TabKey, app: &mut Context<'a>) -> bool {
+        debug!("removing document. key: {:?}", self.document_key);
+        app.documents.lock().unwrap().remove(self.document_key);
+
+        true
     }
 }
 

@@ -9,8 +9,8 @@ use egui_dock::{DockArea, DockState, Style};
 use egui_i18n::tr;
 use log::info;
 use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 use std::sync::mpsc::{Receiver, Sender};
-use serde::{Deserialize, Serialize};
 use slotmap::SlotMap;
 use crate::app::app_tabs::document::DocumentTab;
 use crate::context::Context;
@@ -42,7 +42,7 @@ struct AppState {
 
     sender: Sender<AppMessage>,
     receiver: Receiver<AppMessage>,
-    documents: SlotMap<DocumentKey, DocumentKind>,
+    documents: Arc<Mutex<SlotMap<DocumentKey, DocumentKind>>>,
 }
 
 pub enum AppMessage {
@@ -159,7 +159,6 @@ impl TemplateApp {
     }
 
     fn add_new_tab(&mut self) {
-        let sender = self.state().sender.clone();
         // create a new 'new' tab
         let tab_id = self.tabs.add(TabKind::New(NewTab::default()));
         self.tree.push_to_focused_leaf(tab_id);
@@ -189,7 +188,7 @@ impl TemplateApp {
                 let text_document = TextDocument::create_new(path);
                 let document = DocumentKind::TextDocument(text_document);
 
-                let document_key= self.state().documents.insert(document);
+                let document_key= self.state().documents.lock().unwrap().insert(document);
 
                 let tab_id = self.tabs.add(TabKind::Document(DocumentTab::new(title, document_key)));
                 self.tree.push_to_focused_leaf(tab_id);
@@ -274,8 +273,9 @@ impl eframe::App for TemplateApp {
             }
         }
 
-        let sender = &self.state().sender.clone();
-        let documents = &mut self.state().documents;
+        // TODO discover whether cloning a sender is expensive or not
+        let sender = self.state().sender.clone();
+        let documents = self.state().documents.clone();
 
         let mut context = Context {
             config: &mut self.config,

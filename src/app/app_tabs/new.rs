@@ -8,7 +8,7 @@ use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, FlexDirect
 use egui_taffy::{taffy, tui, Tui, TuiBuilderLogic, TuiContainerResponse};
 use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationErrors};
-use crate::app::{AppMessage, DocumentArgs, DocumentKind};
+use crate::app::{AppMessage, DocumentArgs};
 use crate::context::Context;
 use crate::file_picker::Picker;
 use crate::i18n::fluent_argument_helpers;
@@ -267,7 +267,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                     })
                     .ui_add(Button::new("Submit"))
                     .clicked() {
-                    self.on_submit(_context.sender);
+                    self.on_submit(&_context.sender);
                 }
 
             });

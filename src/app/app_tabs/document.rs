@@ -20,14 +20,15 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
 
         // get the document, this will fail if the document has not been restored on application startup.
 
-        let document = _context.documents.get(self.document_key);
+        let documents_guard = _context.documents.lock().unwrap();
+        let document = documents_guard.get(self.document_key);
 
         match document {
             Some(document) => {
                 ui.label("loaded");
             },
             None => {
-                ui.label("not loaded");
+                ui.label("unknown document key");
             }
         }
     }

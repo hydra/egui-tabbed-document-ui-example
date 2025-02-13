@@ -1,11 +1,16 @@
 use std::path::PathBuf;
 use crate::app::tabs::{Tab, TabKey};
-use egui::{Button, Response, TextEdit, Ui, Widget, WidgetText};
-use egui_i18n::tr;
-use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent};
+use egui::{Button, Response, RichText, TextBuffer, TextEdit, Ui, Widget, WidgetText};
+use egui_i18n::{fluent, tr, translate_fluent};
+use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent, span};
 use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, FlexDirection, Style};
-use egui_taffy::{taffy, tui, TuiBuilderLogic, TuiContainerResponse};
+use egui_taffy::{taffy, tui, Tui, TuiBuilderLogic, TuiContainerResponse};
+use fluent_bundle::FluentValue;
+use fluent_bundle::types::{FluentNumber, FluentNumberOptions};
+use log::warn;
 use serde::{Deserialize, Serialize};
+use serde_json::{Number, Value};
+use validator::{Validate, ValidationErrors};
 use crate::context::Context;
 use crate::file_picker::Picker;
 
@@ -24,12 +29,15 @@ pub struct NewTab {
 }
 
 // FIXME form errors do not use i18n
-#[derive(Clone, Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Validate, Deserialize, Serialize)]
 struct NewTabForm {
+    #[validate(length(min = 1, code = "form-new-name-error-length"))]
     name: String,
 
+    #[validate(required(code = "form-common-error-required"))]
     kind: Option<NewDocumentKind>,
 
+    #[validate(required(code = "form-common-error-required"))]
     directory: Option<PathBuf>
 }
 
@@ -49,6 +57,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
         if let Ok(picked_directory) = self.file_picker.picked() {
             self.fields.directory = Some(picked_directory);
         }
+
+        let validation_errors = self.fields.validate();
 
         ui.ctx().style_mut(|style| {
             // if this is not done, text in labels/checkboxes/etc wraps
@@ -139,6 +149,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                             }, no_transform);
                                     });
 
+                                Self::field_error(&validation_errors, default_style, tui, "name");
+
                                 //
                                 // Directory field
                                 //
@@ -185,6 +197,8 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                 self.file_picker.pick_folder()
                                             }
                                         });
+
+                                Self::field_error(&validation_errors, default_style, tui, "directory");
 
                                 //
                                 // Kind field
@@ -242,8 +256,10 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                 })
                                         }, no_transform);
                                     });
+                                Self::field_error(&validation_errors, default_style, tui, "kind");
                             });
-                });
+
+                    });
 
                 if tui
                     .style(Style {
@@ -261,6 +277,62 @@ impl<'a> Tab<Context<'a>> for NewTab {
 impl NewTab {
     fn on_submit(&mut self) {
         println!("Submitted: {:?}", self.fields);
+    }
+
+    fn field_error(validation_errors: &Result<(), ValidationErrors>, default_style: fn() -> Style, tui: &mut Tui, field_name: &str) {
+        if let Err(errors) = validation_errors {
+            let errs = errors.field_errors();
+            if let Some(field_errors) = errs.get(field_name) {
+                tui
+                    .style(Style {
+                        grid_column: span(2),
+                        ..default_style()
+                    })
+                    .add(|tui| {
+                        for field_error in field_errors.iter() {
+                            let code = &field_error.code;
+                            let params = &field_error.params;
+
+                            let mut args = fluent::FluentArgs::new();
+                            for (key, value) in params.iter() {
+                                match value {
+                                    Value::Null => {
+                                        warn!("encountered null value for field: {}", key);
+                                    },
+                                    Value::Bool(_) => todo!(),
+                                    Value::Number(number) => {
+                                        // TODO make sure this is correct!  perhaps write some integration tests to prove the conversion is correct.
+                                        if number.is_f64() {
+                                            let value = FluentValue::Number(FluentNumber::new(number.as_f64().unwrap(), FluentNumberOptions::default()));
+                                            args.set(key.as_str(), value);
+                                        } else if number.is_i64() {
+                                            let value = FluentValue::Number(FluentNumber::new(number.as_i64().unwrap() as f64, FluentNumberOptions::default()));
+                                            args.set(key.as_str(), value);
+                                        } else if number.is_u64() {
+                                            let value = FluentValue::Number(FluentNumber::new(number.as_u64().unwrap() as f64, FluentNumberOptions::default()));
+                                            args.set(key.as_str(), value);
+                                        } else {
+                                            unreachable!()
+                                        }
+                                    },
+                                    Value::String(string) => {
+                                        let value = FluentValue::String(string.into());
+                                        args.set(key.as_str(), value);
+                                    },
+                                    Value::Array(_) => todo!(),
+                                    Value::Object(_) => todo!(),
+                                }
+                            }
+
+                            let message = translate_fluent(code, &args);
+
+                            println!("field_error: {}", field_error);
+
+                            tui.label(RichText::new(message).color(colors::ERROR));
+                        }
+                    });
+            }
+        }
     }
 }
 

@@ -32,15 +32,15 @@
       - [x] Shows a welcome message.
       - [x] Shows a checkbox with the message 'Open on startup', see 'state items' below.
     - 'New' tab
-      - [ ] a form is shown with 3 main controls , each with a label, in a grid with labels on the left. Below the form an OK button should be present.
+      - [x] a form is shown with 3 main controls , each with a label, in a grid with labels on the left. Below the form an OK button should be present.
         - Name - text entry, ideally with placeholder text, no default name.
         - Type - dropdown, initially nothing selected, choose between Text or Bitmap.
           - dropdown should always appear, correctly and allow all elements to be chosen even if the window is resized.
         - Directory - non-editable path with a button to show a native directory selector to be used, that when selected shows the path.
-      - [ ] Title of the new tab is 'New'
-      - [ ] Multiple 'new' tabs are allowed, each with their own state.
-      - Tab state
-        - [ ] The form field values.
+      - [x] Title of the new tab is 'New'
+      - [x] Multiple 'new' tabs are allowed, each with their own state.
+      - Runtime tab state
+        - [x] The form field values.
       - When OK is pressed
         - [ ] the tab name should be updated to the name of the file.
         - [ ] a file should be created with the appropriate extension.

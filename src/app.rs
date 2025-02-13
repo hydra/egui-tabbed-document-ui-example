@@ -270,7 +270,14 @@ impl eframe::App for TemplateApp {
                 }
             }
 
-            let stuff = self.tabs.iter_mut().find_map(|(tab_key, tab_kind)| {
+            // when the app starts up, the documents will be empty, and the document tabs will have keys that don't exist
+            // in the documents list (because it's empty now).
+            // we have to find these tabs, create documents, store them in the map and replace the tab's document key
+            // with the new key generated when adding the key to the map
+            // we have to do this as a two-step process to above borrow-checker issues
+
+            // step 1 - find the document tabs and create corresponding documents, return the tab keys and documents.
+            let documents_for_tabs = self.tabs.iter_mut().filter_map(|(tab_key, tab_kind)| {
                 match tab_kind {
                     TabKind::Document(document_tab) => {
 
@@ -283,18 +290,19 @@ impl eframe::App for TemplateApp {
                             let text_document = TextDocument::from_path(path.clone());
                             let document = DocumentKind::TextDocument(text_document);
 
-                            Some((tab_key, document))
+                            Some((tab_key.clone(), document))
                         } else {
                             todo!()
                         }
                     }
                     _ => None
                 }
-            });
+            }).collect::<Vec<_>>();
 
-            for (tab_key, document) in stuff {
+            // step 2 - store the documents and update the document key for the tab.
+            for (tab_key, document) in documents_for_tabs {
                 let new_key = self.state().documents.lock().unwrap().insert(document);
-                if let TabKind::Document(mut document_tab) = self.tabs.get(tab_key).unwrap() {
+                if let TabKind::Document(ref mut document_tab) = self.tabs.get_mut(&tab_key).unwrap() {
                     document_tab.document_key = new_key;
                 }
             }

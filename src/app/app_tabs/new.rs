@@ -27,6 +27,13 @@ pub struct NewTab {
     file_picker: Picker,
 }
 
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+pub enum KindChoice {
+    Text,
+    Image
+}
+
+
 // FIXME form errors do not use i18n
 #[derive(Clone, Debug, Default, Validate, Deserialize, Serialize)]
 struct NewTabForm {
@@ -34,7 +41,7 @@ struct NewTabForm {
     name: String,
 
     #[validate(required(code = "form-common-error-required"))]
-    kind: Option<DocumentKind>,
+    kind: Option<KindChoice>,
 
     #[validate(required(code = "form-common-error-required"))]
     directory: Option<PathBuf>
@@ -223,27 +230,27 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                     .width(ui.available_width())
                                                     .selected_text(match self.fields.kind {
                                                         None => tr!("form-common-combo-default"),
-                                                        Some(DocumentKind::Text) => tr!("form-new-kind-text"),
-                                                        Some(DocumentKind::Image) => tr!("form-new-kind-image"),
+                                                        Some(KindChoice::Text) => tr!("form-new-kind-text"),
+                                                        Some(KindChoice::Image) => tr!("form-new-kind-image"),
                                                     })
                                                     .show_ui(ui, |ui| {
                                                         if ui
                                                             .add(egui::SelectableLabel::new(
-                                                                self.fields.kind == Some(DocumentKind::Image),
+                                                                self.fields.kind == Some(KindChoice::Image),
                                                                 tr!("form-new-kind-image"),
                                                             ))
                                                             .clicked()
                                                         {
-                                                            self.fields.kind = Some(DocumentKind::Image)
+                                                            self.fields.kind = Some(KindChoice::Image)
                                                         }
                                                         if ui
                                                             .add(egui::SelectableLabel::new(
-                                                                self.fields.kind == Some(DocumentKind::Text),
+                                                                self.fields.kind == Some(KindChoice::Text),
                                                                 tr!("form-new-kind-text"),
                                                             ))
                                                             .clicked()
                                                         {
-                                                            self.fields.kind = Some(DocumentKind::Text)
+                                                            self.fields.kind = Some(KindChoice::Text)
                                                         }
                                                     }).response
                                                 })

@@ -37,6 +37,8 @@ fluent-bundle = "0.15.3"
 egui_taffy = "0.7.0"
 rfd = "0.15.2"
 
+slotmap = { version = "1.0.7", features = ["serde"] }
+
 log = "0.4.22"
 
 # You only need serde if you want app persistence:

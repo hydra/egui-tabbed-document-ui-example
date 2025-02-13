@@ -1,6 +1,6 @@
 use std::mem::MaybeUninit;
 use crate::app::app_tabs::home::HomeTab;
-use crate::app::app_tabs::new::NewTab;
+use crate::app::app_tabs::new::{KindChoice, NewTab};
 use crate::app::app_tabs::TabKind;
 use crate::app::tabs::{MyTabViewer, TabKey, Tabs};
 use crate::file_picker::Picker;
@@ -11,7 +11,12 @@ use log::info;
 use std::path::PathBuf;
 use std::sync::mpsc::{Receiver, Sender};
 use serde::{Deserialize, Serialize};
+use slotmap::SlotMap;
+use crate::app::app_tabs::document::DocumentTab;
 use crate::context::Context;
+use crate::documents::{DocumentKey, DocumentKind};
+use crate::documents::image::ImageDocument;
+use crate::documents::text::TextDocument;
 
 mod app_tabs;
 mod tabs;
@@ -37,6 +42,7 @@ struct AppState {
 
     sender: Sender<AppMessage>,
     receiver: Receiver<AppMessage>,
+    documents: SlotMap<DocumentKey, DocumentKind>,
 }
 
 pub enum AppMessage {
@@ -46,13 +52,7 @@ pub enum AppMessage {
 pub struct DocumentArgs {
     name: String,
     path: PathBuf,
-    kind: DocumentKind,
-}
-
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-pub enum DocumentKind {
-    Text,
-    Image
+    kind: KindChoice,
 }
 
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -100,6 +100,7 @@ impl AppState {
 
             sender,
             receiver,
+            documents: Default::default(),
         }
     }
 }
@@ -121,6 +122,8 @@ impl TemplateApp {
 
         instance.state.write(AppState::init());
         // Safety: `Self::state()` is now safe to call.
+
+        // FIXME somehow, somewhere, we have to load the documents that were previously loaded
 
         instance
     }
@@ -173,9 +176,28 @@ impl TemplateApp {
     }
 
     fn create_document_tab(&mut self, args: DocumentArgs) {
-        todo!()
-    }
 
+        let DocumentArgs { mut name, mut path, kind } = args;
+
+        match kind {
+            KindChoice::Text => {
+                name.push_str(".txt");
+                path.push(&name);
+
+                let title = path.file_name().unwrap().to_string_lossy().to_string();
+
+                let text_document = TextDocument::create_new(path);
+                let document = DocumentKind::TextDocument(text_document);
+
+                let document_key= self.state().documents.insert(document);
+
+                let tab_id = self.tabs.add(TabKind::Document(DocumentTab::new(title, document_key)));
+                self.tree.push_to_focused_leaf(tab_id);
+
+            }
+            KindChoice::Image => todo!()
+        }
+    }
 
     /// provide mutable access to the state.
     ///
@@ -253,10 +275,12 @@ impl eframe::App for TemplateApp {
         }
 
         let sender = &self.state().sender.clone();
+        let documents = &mut self.state().documents;
 
         let mut context = Context {
             config: &mut self.config,
             sender,
+            documents,
         };
 
         let mut my_tab_viewer = MyTabViewer {

@@ -4,7 +4,7 @@ use egui::{Ui, WidgetText};
 use log::debug;
 use serde::{Deserialize, Serialize};
 use crate::context::Context;
-use crate::documents::DocumentKey;
+use crate::documents::{DocumentKey, DocumentKind};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DocumentTab {
@@ -23,13 +23,21 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
 
         // get the document, this will fail if the document has not been restored on application startup.
 
-        let documents_guard = _context.documents.lock().unwrap();
-        let document = documents_guard.get(self.document_key);
+        let mut documents_guard = _context.documents.lock().unwrap();
+        let document = documents_guard.get_mut(self.document_key);
+
+        // FAIL here we have a catch-22 situation. we need to delegate to the right document implementation
+        //      but cannot pass the context because we need to borrow the documents from the context to find
+        //      out what type of document it is before we can delegate to it.
 
         match document {
-            Some(document) => {
+            Some(document_kind) => {
                 ui.label("loaded");
-            },
+                match document_kind {
+                    DocumentKind::TextDocument(document) => document.ui(ui, _context),
+                    DocumentKind::ImageDocument(document) => document.ui(ui, _context),
+                }
+            }
             None => {
                 ui.label("unknown document key");
             }

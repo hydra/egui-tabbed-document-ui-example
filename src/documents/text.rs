@@ -1,4 +1,6 @@
 use std::path::PathBuf;
+use egui::Ui;
+use crate::context::Context;
 
 pub struct TextDocument {
     pub path: PathBuf,
@@ -19,5 +21,11 @@ impl TextDocument {
             path,
             content: None
         }
+    }
+
+    pub fn ui<'a>(&mut self, ui: &mut Ui, _context: &mut Context<'a>) {
+        ui.label("Text document");
+
+        // todo, use something from the context, e.g. the `Config`.
     }
 }

@@ -1,4 +1,6 @@
+use std::mem::MaybeUninit;
 use std::path::PathBuf;
+use std::sync::mpsc::Sender;
 use crate::app::tabs::{Tab, TabKey};
 use egui::{Button, Response, RichText, TextEdit, Ui, Widget, WidgetText};
 use egui_i18n::{tr, translate_fluent};
@@ -7,6 +9,7 @@ use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, FlexDirect
 use egui_taffy::{taffy, tui, Tui, TuiBuilderLogic, TuiContainerResponse};
 use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationErrors};
+use crate::app::{AppMessage, DocumentArgs, DocumentKind};
 use crate::context::Context;
 use crate::file_picker::Picker;
 use crate::i18n::fluent_argument_helpers;
@@ -17,12 +20,25 @@ mod colors {
     pub const ERROR: Color32 = Color32::from_rgb(0xcb, 0x63, 0x5d);
 }
 
-#[derive(Default, Deserialize, Serialize)]
+#[derive(Deserialize, Serialize)]
 pub struct NewTab {
     fields: NewTabForm,
 
     #[serde(skip)]
     file_picker: Picker,
+
+    #[serde(skip)]
+    sender: Option<Sender<AppMessage>>,
+}
+
+impl NewTab {
+    pub fn init(sender: Sender<AppMessage>) -> Self {
+        Self {
+            fields: Default::default(),
+            file_picker: Default::default(),
+            sender: Some(sender),
+        }
+    }
 }
 
 // FIXME form errors do not use i18n
@@ -32,16 +48,10 @@ struct NewTabForm {
     name: String,
 
     #[validate(required(code = "form-common-error-required"))]
-    kind: Option<NewDocumentKind>,
+    kind: Option<DocumentKind>,
 
     #[validate(required(code = "form-common-error-required"))]
     directory: Option<PathBuf>
-}
-
-#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
-enum NewDocumentKind {
-    Text,
-    Image,
 }
 
 impl<'a> Tab<Context<'a>> for NewTab {
@@ -227,27 +237,27 @@ impl<'a> Tab<Context<'a>> for NewTab {
                                                     .width(ui.available_width())
                                                     .selected_text(match self.fields.kind {
                                                         None => tr!("form-common-combo-default"),
-                                                        Some(NewDocumentKind::Text) => tr!("form-new-kind-text"),
-                                                        Some(NewDocumentKind::Image) => tr!("form-new-kind-image"),
+                                                        Some(DocumentKind::Text) => tr!("form-new-kind-text"),
+                                                        Some(DocumentKind::Image) => tr!("form-new-kind-image"),
                                                     })
                                                     .show_ui(ui, |ui| {
                                                         if ui
                                                             .add(egui::SelectableLabel::new(
-                                                                self.fields.kind == Some(NewDocumentKind::Image),
+                                                                self.fields.kind == Some(DocumentKind::Image),
                                                                 tr!("form-new-kind-image"),
                                                             ))
                                                             .clicked()
                                                         {
-                                                            self.fields.kind = Some(NewDocumentKind::Image)
+                                                            self.fields.kind = Some(DocumentKind::Image)
                                                         }
                                                         if ui
                                                             .add(egui::SelectableLabel::new(
-                                                                self.fields.kind == Some(NewDocumentKind::Text),
+                                                                self.fields.kind == Some(DocumentKind::Text),
                                                                 tr!("form-new-kind-text"),
                                                             ))
                                                             .clicked()
                                                         {
-                                                            self.fields.kind = Some(NewDocumentKind::Text)
+                                                            self.fields.kind = Some(DocumentKind::Text)
                                                         }
                                                     }).response
                                                 })
@@ -274,6 +284,18 @@ impl<'a> Tab<Context<'a>> for NewTab {
 impl NewTab {
     fn on_submit(&mut self) {
         println!("Submitted: {:?}", self.fields);
+
+        if !self.fields.validate().is_ok() {
+            return
+        }
+
+        let args = DocumentArgs {
+            name: self.fields.name.clone(),
+            path: self.fields.directory.as_ref().unwrap().clone(),
+            kind: self.fields.kind.as_ref().unwrap().clone(),
+        };
+
+        self.sender.as_ref().unwrap().send(AppMessage::CreateDocument(args)).unwrap()
     }
 
     fn field_error(validation_errors: &Result<(), ValidationErrors>, default_style: fn() -> Style, tui: &mut Tui, field_name: &str) {

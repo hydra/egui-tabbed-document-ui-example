@@ -1,3 +1,4 @@
+use std::mem::MaybeUninit;
 use crate::app::app_tabs::home::HomeTab;
 use crate::app::app_tabs::new::NewTab;
 use crate::app::app_tabs::TabKind;
@@ -8,6 +9,8 @@ use egui_dock::{DockArea, DockState, Style};
 use egui_i18n::tr;
 use log::info;
 use std::path::PathBuf;
+use std::sync::mpsc::{Receiver, Sender};
+use serde::{Deserialize, Serialize};
 use crate::context::Context;
 
 mod app_tabs;
@@ -22,12 +25,34 @@ pub struct TemplateApp {
 
     config: Config,
 
-    // TODO find a better way of doing this that doesn't require this boolean
+    // state contains fields that cannot be initialized using 'Default'
     #[serde(skip)]
-    startup_done: bool,
+    state: MaybeUninit<AppState>,
+}
 
-    #[serde(skip)]
+struct AppState {
+    // TODO find a better way of doing this that doesn't require this boolean
+    startup_done: bool,
     file_picker: Picker,
+
+    sender: Sender<AppMessage>,
+    receiver: Receiver<AppMessage>,
+}
+
+pub enum AppMessage {
+    CreateDocument(DocumentArgs)
+}
+
+pub struct DocumentArgs {
+    name: String,
+    path: PathBuf,
+    kind: DocumentKind,
+}
+
+#[derive(Clone, Debug, PartialEq, Deserialize, Serialize)]
+pub enum DocumentKind {
+    Text,
+    Image
 }
 
 #[derive(serde::Deserialize, serde::Serialize)]
@@ -60,8 +85,21 @@ impl Default for TemplateApp {
             tabs,
             tree,
             config,
+            state: MaybeUninit::uninit(),
+        }
+    }
+}
+
+impl AppState {
+    pub fn init() -> Self {
+        let (sender, receiver) = std::sync::mpsc::channel();
+
+        Self {
             startup_done: false,
             file_picker: Picker::default(),
+
+            sender,
+            receiver,
         }
     }
 }
@@ -75,11 +113,16 @@ impl TemplateApp {
 
         // Load previous app state (if any).
         // Note that you must enable the `persistence` feature for this to work.
-        if let Some(storage) = cc.storage {
-            return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
-        }
+        let mut instance = if let Some(storage) = cc.storage {
+            eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default()
+        } else {
+            Self::default()
+        };
 
-        Default::default()
+        instance.state.write(AppState::init());
+        // Safety: `Self::state()` is now safe to call.
+
+        instance
     }
 
     fn show_home_tab(&mut self) {
@@ -113,19 +156,35 @@ impl TemplateApp {
     }
 
     fn add_new_tab(&mut self) {
+        let sender = self.state().sender.clone();
         // create a new 'new' tab
-        let tab_id = self.tabs.add(TabKind::New(NewTab::default()));
+        let tab_id = self.tabs.add(TabKind::New(NewTab::init(sender)));
         self.tree.push_to_focused_leaf(tab_id);
     }
 
     fn pick_file(&mut self) {
-        if !self.file_picker.is_picking() {
-            self.file_picker.pick_file();
+        if !self.state().file_picker.is_picking() {
+            self.state().file_picker.pick_file();
         }
     }
 
     fn open_file(&mut self, path: PathBuf) {
         info!("open file. path: {:?}", path);
+    }
+
+    fn create_document_tab(&mut self, args: DocumentArgs) {
+        todo!()
+    }
+
+
+    /// provide mutable access to the state.
+    ///
+    /// Safety: it's always safe, because `new` calls `state.write()`
+    ///
+    /// Note: it's either `self.state()` everywhere or `self.state.unwrap()` if `AppSate` was wrapped in an `Option`
+    /// instead if `MaybeUninit`, this is less verbose.
+    fn state(&mut self) -> &mut AppState {
+        unsafe { self.state.assume_init_mut() }
     }
 }
 
@@ -180,8 +239,8 @@ impl eframe::App for TemplateApp {
             });
         });
 
-        if !self.startup_done {
-            self.startup_done = true;
+        if !self.state().startup_done {
+            self.state().startup_done = true;
 
             if self.config.show_home_tab_on_startup {
                 self.show_home_tab();
@@ -206,8 +265,17 @@ impl eframe::App for TemplateApp {
             .style(Style::from_egui(ctx.style().as_ref()))
             .show(ctx, &mut my_tab_viewer);
 
-        if let Ok(picked_file) = self.file_picker.picked() {
+        if let Ok(picked_file) = self.state().file_picker.picked() {
             self.open_file(picked_file);
+        }
+
+
+        let mut messages: Vec<AppMessage> = self.state().receiver.try_iter().collect();
+
+        for message in messages.drain(..) {
+            match message {
+                AppMessage::CreateDocument(args) => self.create_document_tab(args),
+            }
         }
     }
 }

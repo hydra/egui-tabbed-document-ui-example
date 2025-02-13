@@ -21,7 +21,7 @@ eframe = { version = "0.31.0", default-features = false, features = [
 ] }
 
 # latest version may be ok, but this version works
-egui-i18n = { git = "https://github.com/fewensa/egui-i18n", rev = "3be4d89e6328d545a715529ac80415f49d675756" }
+egui-i18n = { git = "https://github.com/fewensa/egui-i18n", rev = "3be4d89e6328d545a715529ac80415f49d675756", features = ["fluent"] }
 
 # 0.16 supports egui 0.31
 egui_dock = { version = "0.16.0", features = ["serde"]}
@@ -31,6 +31,9 @@ egui_material_icons = { git = "https://github.com/lucasmerlin/hello_egui.git", t
 #egui_flex = { path = "../hello_egui/crates/egui_flex" }
 #egui_form = { path = "../hello_egui/crates/egui_form", features = ["validator_garde"] }
 
+validator = { version = "0.20.0", features = ["derive"] }
+fluent = "0.16"
+fluent-bundle = "0.15.3"
 egui_taffy = "0.7.0"
 rfd = "0.15.2"
 
@@ -38,6 +41,9 @@ log = "0.4.22"
 
 # You only need serde if you want app persistence:
 serde = { version = "1", features = ["derive"] }
+
+# Required for form validation (!)
+serde_json = "1"
 
 # native:
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

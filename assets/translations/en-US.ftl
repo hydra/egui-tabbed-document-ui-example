@@ -11,6 +11,8 @@ home-heading = Home
 home-tab-show-on-startup = Show on startup
 
 form-new-name = Name
+form-new-name-error-length = Minimum length { $min }
+
 form-new-kind = Kind
 form-new-kind-image = Image
 form-new-kind-text = Text
@@ -19,4 +21,5 @@ form-new-directory = Directory
 form-common-button-ok = Ok
 form-common-button-cancel = Cancel
 
-form-common-combo-default =
+form-common-combo-default = -- Select --
+form-common-error-required = Required

@@ -284,7 +284,7 @@ impl NewTab {
 
         let args = DocumentArgs {
             name: self.fields.name.clone(),
-            path: self.fields.directory.as_ref().unwrap().clone(),
+            directory: self.fields.directory.as_ref().unwrap().clone(),
             kind: self.fields.kind.as_ref().unwrap().clone(),
         };
 

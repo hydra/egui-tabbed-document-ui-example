@@ -55,7 +55,7 @@ pub enum MessageSource {
 
 pub struct DocumentArgs {
     name: String,
-    path: PathBuf,
+    directory: PathBuf,
     kind: KindChoice,
 }
 
@@ -188,7 +188,7 @@ impl TemplateApp {
     }
 
     fn create_document_tab_inner(&mut self, args: DocumentArgs) -> TabKind {
-        let DocumentArgs { mut name, mut path, kind } = args;
+        let DocumentArgs { mut name, directory: mut path, kind } = args;
 
         match kind {
             KindChoice::Text => {

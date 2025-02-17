@@ -378,9 +378,6 @@ impl eframe::App for TemplateApp {
                         unreachable!()
                     }
                 },
-                // (_, AppMessage::CreateDocument(args)) => {
-                //     self.create_document_tab(args);
-                // },
             }
         }
     }

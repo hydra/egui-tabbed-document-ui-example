@@ -40,13 +40,17 @@ struct AppState {
     startup_done: bool,
     file_picker: Picker,
 
-    sender: Sender<AppMessage>,
-    receiver: Receiver<AppMessage>,
+    sender: Sender<(MessageSource, AppMessage)>,
+    receiver: Receiver<(MessageSource, AppMessage)>,
     documents: Arc<Mutex<SlotMap<DocumentKey, DocumentKind>>>,
 }
 
 pub enum AppMessage {
     CreateDocument(DocumentArgs)
+}
+
+pub enum MessageSource {
+    Tab(TabKey)
 }
 
 pub struct DocumentArgs {
@@ -173,7 +177,17 @@ impl TemplateApp {
     }
 
     fn create_document_tab(&mut self, args: DocumentArgs) {
+        let tab_kind = self.create_document_tab_inner(args);
 
+        self.add_tab(tab_kind);
+    }
+
+    fn add_tab(&mut self, tab_kind: TabKind) {
+        let tab_id = self.tabs.add(tab_kind);
+        self.tree.push_to_focused_leaf(tab_id);
+    }
+
+    fn create_document_tab_inner(&mut self, args: DocumentArgs) -> TabKind {
         let DocumentArgs { mut name, mut path, kind } = args;
 
         match kind {
@@ -188,9 +202,7 @@ impl TemplateApp {
 
                 let document_key= self.state().documents.lock().unwrap().insert(document);
 
-                let tab_id = self.tabs.add(TabKind::Document(DocumentTab::new(title, path, document_key)));
-                self.tree.push_to_focused_leaf(tab_id);
-
+                TabKind::Document(DocumentTab::new(title, path, document_key))
             }
             KindChoice::Image => todo!()
         }
@@ -293,7 +305,7 @@ impl eframe::App for TemplateApp {
                     let home_button = ui.button(tr!("toolbar-button-home"));
                     let new_button = ui.button(tr!("toolbar-button-new"));
                     let open_button = ui.button(tr!("toolbar-button-open"));
-                    let close_all = ui.button(tr!("toolbar-button-close-all"));
+                    let close_all_button = ui.button(tr!("toolbar-button-close-all"));
 
                     if home_button.clicked() {
                         self.show_home_tab();
@@ -307,7 +319,7 @@ impl eframe::App for TemplateApp {
                         self.pick_file()
                     }
 
-                    if close_all.clicked() {
+                    if close_all_button.clicked() {
                         // FIXME there's a bug in `egui_dock` where the `on_close` handler is not called
                         //       when programmatically closing all the tabs - reported via discord: https://discord.com/channels/900275882684477440/1075333382290026567/1340993744941617233
                         self.tree.retain_tabs(|_tab_key|false);
@@ -350,11 +362,20 @@ impl eframe::App for TemplateApp {
         }
 
 
-        let mut messages: Vec<AppMessage> = self.state().receiver.try_iter().collect();
+        let mut messages: Vec<(MessageSource, AppMessage)> = self.state().receiver.try_iter().collect();
 
-        for message in messages.drain(..) {
-            match message {
-                AppMessage::CreateDocument(args) => self.create_document_tab(args),
+        for (source, message) in messages.drain(..) {
+            match (source, message) {
+                (MessageSource::Tab(tab_key), AppMessage::CreateDocument(args)) => {
+                    // replace tabs here...
+
+                    if let Some(mut tab_kind) = self.tabs.get_mut(&tab_key) {
+                        *tab_kind = self.create_document_tab_inner(args);
+                    }
+                },
+                // (_, AppMessage::CreateDocument(args)) => {
+                //     self.create_document_tab(args);
+                // },
             }
         }
     }

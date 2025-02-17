@@ -8,7 +8,7 @@ use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, FlexDirect
 use egui_taffy::{taffy, tui, Tui, TuiBuilderLogic, TuiContainerResponse};
 use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationErrors};
-use crate::app::{AppMessage, DocumentArgs};
+use crate::app::{AppMessage, DocumentArgs, MessageSource};
 use crate::context::Context;
 use crate::file_picker::Picker;
 use crate::i18n::fluent_argument_helpers;
@@ -52,7 +52,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
         egui::widget_text::WidgetText::from("New")
     }
 
-    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, _context: &mut Context<'a>) {
+    fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, _context: &mut Context<'a>) {
 
         if let Ok(picked_directory) = self.file_picker.picked() {
             self.fields.directory = Some(picked_directory);
@@ -267,7 +267,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
                     })
                     .ui_add(Button::new("Submit"))
                     .clicked() {
-                    self.on_submit(&_context.sender);
+                    self.on_submit(tab_key, &_context.sender);
                 }
 
             });
@@ -275,7 +275,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
 }
 
 impl NewTab {
-    fn on_submit(&mut self, sender: &Sender<AppMessage>) {
+    fn on_submit(&mut self, tab_key: &TabKey, sender: &Sender<(MessageSource, AppMessage)>) {
         println!("Submitted: {:?}", self.fields);
 
         if !self.fields.validate().is_ok() {
@@ -288,7 +288,7 @@ impl NewTab {
             kind: self.fields.kind.as_ref().unwrap().clone(),
         };
 
-        sender.send(AppMessage::CreateDocument(args)).unwrap()
+        sender.send((MessageSource::Tab(tab_key.clone()), AppMessage::CreateDocument(args))).unwrap()
     }
 
     fn field_error(validation_errors: &Result<(), ValidationErrors>, default_style: fn() -> Style, tui: &mut Tui, field_name: &str) {

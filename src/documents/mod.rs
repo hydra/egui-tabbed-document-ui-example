@@ -1,6 +1,6 @@
 use std::sync::mpsc::Sender;
 use slotmap::new_key_type;
-use crate::app::{AppMessage, Config};
+use crate::app::{AppMessage, Config, MessageSource};
 use crate::documents::image::ImageDocument;
 use crate::documents::text::TextDocument;
 
@@ -20,5 +20,5 @@ pub enum DocumentKind {
 
 pub struct DocumentContext<'a> {
     pub config: &'a mut Config,
-    pub sender: Sender<AppMessage>,
+    pub sender: Sender<(MessageSource, AppMessage)>,
 }

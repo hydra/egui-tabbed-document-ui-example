@@ -337,6 +337,9 @@ impl eframe::App for TemplateApp {
             .show(ctx, &mut my_tab_viewer);
 
         if let Ok(picked_file) = self.state().file_picker.picked() {
+
+            // FIXME this `update` method does not get called immediately after picking a file, instead update gets
+            //       called when the user moves the mouse or interacts with the window again.
             self.open_file(picked_file);
         }
 

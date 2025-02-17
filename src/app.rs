@@ -174,6 +174,23 @@ impl TemplateApp {
 
     fn open_file(&mut self, path: PathBuf) {
         info!("open file. path: {:?}", path);
+
+        let title = path.file_name().unwrap().to_string_lossy().to_string();
+
+        let extension = path.extension().unwrap().to_string_lossy().to_string();
+        let document = if extension.eq("txt") {
+            let text_document = TextDocument::from_path(path.clone());
+            let document = DocumentKind::TextDocument(text_document);
+
+            document
+        } else {
+            todo!()
+        };
+
+        let document_key= self.state().documents.lock().unwrap().insert(document);
+        let tab_kind = TabKind::Document(DocumentTab::new(title, path, document_key));
+
+        self.add_tab(tab_kind);
     }
 
     fn create_document_tab(&mut self, args: DocumentArgs) {
@@ -201,7 +218,6 @@ impl TemplateApp {
                 let document = DocumentKind::TextDocument(text_document);
 
                 let document_key= self.state().documents.lock().unwrap().insert(document);
-
                 TabKind::Document(DocumentTab::new(title, path, document_key))
             }
             KindChoice::Image => todo!()

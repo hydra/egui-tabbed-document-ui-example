@@ -292,8 +292,8 @@ impl eframe::App for TemplateApp {
                 ui.horizontal(|ui| {
                     let home_button = ui.button(tr!("toolbar-button-home"));
                     let new_button = ui.button(tr!("toolbar-button-new"));
-                    let _open_button = ui.button(tr!("toolbar-button-open"));
-                    let _close_all = ui.button(tr!("toolbar-button-close-all"));
+                    let open_button = ui.button(tr!("toolbar-button-open"));
+                    let close_all = ui.button(tr!("toolbar-button-close-all"));
 
                     if home_button.clicked() {
                         self.show_home_tab();
@@ -303,8 +303,14 @@ impl eframe::App for TemplateApp {
                         self.add_new_tab();
                     }
 
-                    if _open_button.clicked() {
+                    if open_button.clicked() {
                         self.pick_file()
+                    }
+
+                    if close_all.clicked() {
+                        // FIXME there's a bug in `egui_dock` where the `on_close` handler is not called
+                        //       when programmatically closing all the tabs - reported via discord: https://discord.com/channels/900275882684477440/1075333382290026567/1340993744941617233
+                        self.tree.retain_tabs(|_tab_key|false);
                     }
                 });
             });

@@ -49,11 +49,13 @@ struct AppState {
 
 #[derive(Debug)]
 pub enum AppMessage {
+    Refresh,
     CreateDocument(DocumentArgs)
 }
 
 #[derive(Debug)]
 pub enum MessageSource {
+    Document(DocumentKey),
     Tab(TabKey)
 }
 
@@ -179,7 +181,7 @@ impl TemplateApp {
 
     fn open_file(&mut self, path: PathBuf) {
         info!("open file. path: {:?}", path);
-
+ 
         let title = path.file_name().unwrap().to_string_lossy().to_string();
 
         let extension = path.extension().unwrap().to_string_lossy().to_string();
@@ -410,10 +412,17 @@ impl eframe::App for TemplateApp {
                     if let Some(tab_kind) = self.tabs.get_mut(&tab_key) {
                         *tab_kind = document_tab_kind;
                     } else {
-                        // message is sent from a tab that exists.
+                        // message is sent from a tab that does not exist.
                         unreachable!()
                     }
                 },
+                (_, AppMessage::Refresh) => {
+                    // nothing to do, we're already refreshing at this point.
+                }
+                (_, _) => {
+                    // unprocessed message
+                    unreachable!()
+                }
             }
         }
     }

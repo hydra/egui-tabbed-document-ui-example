@@ -31,6 +31,7 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
         let mut document_context = DocumentContext {
             config: context.config,
             sender: context.sender.clone(),
+            document_key: &self.document_key,
         };
 
         // Note: we specifically do NOT pass a `TabKey` to the document as the document should NOT know that it lives in a tab.

@@ -19,6 +19,7 @@ pub enum DocumentKind {
 
 
 pub struct DocumentContext<'a> {
+    pub document_key: &'a DocumentKey,
     pub config: &'a mut Config,
     pub sender: UiInboxSender<(MessageSource, AppMessage)>,
 }

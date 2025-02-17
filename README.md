@@ -49,8 +49,8 @@
         - [x] tab ordering must be preserved.  e.g. given tabs 'File1, New, File2' pressing 'Ok' on `New` should result in tabs 'File1, File3, File2', not 'File1, File2, File3'
     - 'Text' tab, displays a 'text' document.
       - [x] Filename must appear in tab.
-      - [ ] Show text file content in an editor.
-      - [ ] Content must be loaded in a thread or async, in the background.
+      - [x] Show text file content in an editor.
+      - [x] Content must be loaded in a thread or async, in the background.
       - Tab State
         - [ ] Maintain text selection.
         - [ ] Maintain caret position.

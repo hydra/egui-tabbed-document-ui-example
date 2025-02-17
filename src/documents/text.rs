@@ -1,7 +1,9 @@
 use std::path::PathBuf;
+use std::thread;
 use std::thread::JoinHandle;
 use egui::Ui;
 use egui_i18n::tr;
+use log::info;
 use crate::documents::DocumentContext;
 
 pub struct TextDocument {
@@ -34,9 +36,10 @@ impl TextDocumentContent {
     }
 
     fn load(path: PathBuf) -> Self {
-        let handle = std::thread::Builder::new()
+        let handle = thread::Builder::new()
             .name(format!("loader: {:?}", path))
             .spawn(move || {
+                info!("Loading {}", path.display());
                 let content = std::fs::read_to_string(path).unwrap();
 
                 content

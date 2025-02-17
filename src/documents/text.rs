@@ -6,7 +6,7 @@ use egui::Ui;
 use egui_i18n::tr;
 use log::info;
 use crate::app::{AppMessage, AppMessageSender, MessageSource};
-use crate::documents::DocumentContext;
+use crate::documents::{DocumentContext, DocumentKey};
 
 pub struct TextDocument {
     pub path: PathBuf,
@@ -37,7 +37,7 @@ impl TextDocumentContent {
         }
     }
 
-    fn load(path: PathBuf, message: (MessageSource, AppMessage), sender: AppMessageSender) -> Self {
+    fn load(path: PathBuf, on_loaded_message: (MessageSource, AppMessage), sender: AppMessageSender) -> Self {
         let handle = thread::Builder::new()
             .name(format!("loader: {:?}", path))
             .spawn(move || {
@@ -51,7 +51,7 @@ impl TextDocumentContent {
                 let content = std::fs::read_to_string(path).unwrap();
 
                 // send a message via the sender to cause the UI to be updated when loading is complete.
-                sender.send(message).expect("sent");
+                sender.send(on_loaded_message).expect("sent");
 
                 content
         }).unwrap();
@@ -85,7 +85,8 @@ impl TextDocument {
         }
     }
 
-    pub fn from_path(path: PathBuf, message: (MessageSource, AppMessage), sender: AppMessageSender) -> Self {
+    pub fn from_path(path: PathBuf, document_key: DocumentKey, sender: AppMessageSender) -> Self {
+        let message = (MessageSource::Document(document_key), AppMessage::Refresh);
         let loader = TextDocumentContent::load(path.clone(), message, sender);
 
         Self {

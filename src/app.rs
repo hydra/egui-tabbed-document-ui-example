@@ -193,8 +193,7 @@ impl TemplateApp {
             
             |new_key|{
                 if extension.eq("txt") {
-                    let message = (MessageSource::Document(new_key), AppMessage::Refresh);
-                    let text_document = TextDocument::from_path(path.clone(), message, sender);
+                    let text_document = TextDocument::from_path(path.clone(), new_key, sender);
                     let document = DocumentKind::TextDocument(text_document);
 
                     document
@@ -297,15 +296,14 @@ impl TemplateApp {
             
             let new_key = self.state().documents.lock().unwrap().insert_with_key({
                 let sender = sender.clone();
-                |key|{
+                |new_key|{
 
                     let extension = path.extension().unwrap().to_str().unwrap();
 
                     const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
 
                     if SUPPORTED_TEXT_EXTENSIONS.contains(&extension) {
-                        let message = (MessageSource::Document(key), AppMessage::Refresh);
-                        let text_document = TextDocument::from_path(path.clone(), message, sender);
+                        let text_document = TextDocument::from_path(path.clone(), new_key, sender);
                         let document = DocumentKind::TextDocument(text_document);
 
                         document

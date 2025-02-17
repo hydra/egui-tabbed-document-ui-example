@@ -7,7 +7,7 @@ use crate::file_picker::Picker;
 use crate::fonts;
 use egui_dock::{DockArea, DockState, Style};
 use egui_i18n::tr;
-use log::info;
+use log::{debug, info};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use egui_inbox::{UiInbox, UiInboxSender};
@@ -49,11 +49,13 @@ struct AppState {
 
 #[derive(Debug)]
 pub enum AppMessage {
+    Refresh,
     CreateDocument(DocumentArgs)
 }
 
 #[derive(Debug)]
 pub enum MessageSource {
+    Document(DocumentKey),
     Tab(TabKey)
 }
 
@@ -183,16 +185,24 @@ impl TemplateApp {
         let title = path.file_name().unwrap().to_string_lossy().to_string();
 
         let extension = path.extension().unwrap().to_string_lossy().to_string();
-        let document = if extension.eq("txt") {
-            let text_document = TextDocument::from_path(path.clone());
-            let document = DocumentKind::TextDocument(text_document);
 
-            document
-        } else {
-            todo!()
-        };
+        let sender = self.state().sender.clone();
+        
+        let document_key= self.state().documents.lock().unwrap().insert_with_key({
+            let sender = sender.clone();
+            
+            |new_key|{
+                if extension.eq("txt") {
+                    let message = (MessageSource::Document(new_key), AppMessage::Refresh);
+                    let text_document = TextDocument::from_path(path.clone(), message, sender);
+                    let document = DocumentKind::TextDocument(text_document);
 
-        let document_key= self.state().documents.lock().unwrap().insert(document);
+                    document
+                } else {
+                    todo!()
+                }
+            }
+        });
         let tab_kind = TabKind::Document(DocumentTab::new(title, path, document_key));
 
         self.add_tab(tab_kind);
@@ -270,32 +280,40 @@ impl TemplateApp {
     /// Safety: call only once on startup, before the tabs are shown.
     fn restore_documents_on_startup(&mut self) {
         // we have to do this as a two-step process to above borrow-checker issues
-
-        // step 1 - find the document tabs and create corresponding documents, return the tab keys and documents.
-        let documents_for_tabs = self.tabs.iter_mut().filter_map(|(tab_key, tab_kind)| {
+        
+        // step 1 - find the document tabs, return the tab keys and paths.
+        let tab_keys_and_paths = self.tabs.iter_mut().filter_map(|(tab_key, tab_kind)| {
             match tab_kind {
                 TabKind::Document(document_tab) => {
-                    let path = document_tab.path.clone();
-                    let extension = path.extension().unwrap().to_str().unwrap();
-
-                    const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
-
-                    if SUPPORTED_TEXT_EXTENSIONS.contains(&extension) {
-                        let text_document = TextDocument::from_path(path.clone());
-                        let document = DocumentKind::TextDocument(text_document);
-
-                        Some((tab_key.clone(), document))
-                    } else {
-                        todo!()
-                    }
+                    Some((tab_key.clone(), document_tab.path.clone()))
                 }
                 _ => None
             }
         }).collect::<Vec<_>>();
 
         // step 2 - store the documents and update the document key for the tab.
-        for (tab_key, document) in documents_for_tabs {
-            let new_key = self.state().documents.lock().unwrap().insert(document);
+        for (tab_key, path) in tab_keys_and_paths {
+            let sender = self.state().sender.clone();
+            
+            let new_key = self.state().documents.lock().unwrap().insert_with_key({
+                let sender = sender.clone();
+                |key|{
+
+                    let extension = path.extension().unwrap().to_str().unwrap();
+
+                    const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
+
+                    if SUPPORTED_TEXT_EXTENSIONS.contains(&extension) {
+                        let message = (MessageSource::Document(key), AppMessage::Refresh);
+                        let text_document = TextDocument::from_path(path.clone(), message, sender);
+                        let document = DocumentKind::TextDocument(text_document);
+
+                        document
+                    } else {
+                        todo!()
+                    }
+                }
+            });
             if let TabKind::Document(ref mut document_tab) = self.tabs.get_mut(&tab_key).unwrap() {
                 document_tab.document_key = new_key;
             } else {
@@ -410,10 +428,18 @@ impl eframe::App for TemplateApp {
                     if let Some(tab_kind) = self.tabs.get_mut(&tab_key) {
                         *tab_kind = document_tab_kind;
                     } else {
-                        // message is sent from a tab that exists.
+                        // message is sent from a tab that does not exist.
                         unreachable!()
                     }
                 },
+                (source, AppMessage::Refresh) => {
+                    // nothing to do, we're already refreshing at this point.
+                    debug!("refresh message received. source: {:?}", source);
+                }
+                (_, _) => {
+                    // unprocessed message
+                    unreachable!()
+                }
             }
         }
     }

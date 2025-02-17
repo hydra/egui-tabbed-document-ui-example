@@ -3,6 +3,8 @@ toolbar-button-new = New
 toolbar-button-open = Open
 toolbar-button-close-all = Close all
 
+file-loading = Loading...
+
 menu-top-level-file = File
 menu-item-quit = Quit
 

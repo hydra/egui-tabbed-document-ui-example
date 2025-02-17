@@ -387,7 +387,7 @@ impl eframe::App for TemplateApp {
 
                     let document_tab_kind = self.create_document_tab_inner(args);
 
-                    if let Some(mut tab_kind) = self.tabs.get_mut(&tab_key) {
+                    if let Some(tab_kind) = self.tabs.get_mut(&tab_key) {
                         *tab_kind = document_tab_kind;
                     } else {
                         // message is sent from a tab that exists.

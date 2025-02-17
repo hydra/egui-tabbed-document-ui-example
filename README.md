@@ -48,7 +48,7 @@
         - [x] there should be no visible removal and insertion of any new tab.
         - [x] tab ordering must be preserved.  e.g. given tabs 'File1, New, File2' pressing 'Ok' on `New` should result in tabs 'File1, File3, File2', not 'File1, File2, File3'
     - 'Text' tab, displays a 'text' document.
-      - [ ] Filename must appear in tab.
+      - [x] Filename must appear in tab.
       - [ ] Show text file content in an editor.
       - [ ] Content must be loaded in a thread or async, in the background.
       - Tab State

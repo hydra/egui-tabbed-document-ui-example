@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 use std::thread;
 use std::thread::JoinHandle;
+use std::time::Duration;
 use egui::Ui;
 use egui_i18n::tr;
 use log::info;
@@ -40,6 +41,12 @@ impl TextDocumentContent {
             .name(format!("loader: {:?}", path))
             .spawn(move || {
                 info!("Loading {}", path.display());
+                
+                // FIXME add a 2 second delay to simulate slow loading so that the lack of some UI notification on
+                //       thread complete can be observed in the UI.  Some UI interaction is required before the 
+                //       content becomes visible, e.g. moving the mouse.
+                thread::sleep(Duration::from_secs(2));
+
                 let content = std::fs::read_to_string(path).unwrap();
 
                 content

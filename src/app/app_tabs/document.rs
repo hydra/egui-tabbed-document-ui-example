@@ -18,33 +18,26 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
         egui::widget_text::WidgetText::from(self.title.clone())
     }
 
-    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, _context: &mut Context<'a>) {
+    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context<'a>) {
         ui.label(format!("path: {:?}, key: {:?}", self.path, self.document_key));
-
+        
         // get the document, this will fail if the document has not been restored on application startup.
+        let mut documents_guard = context.documents.lock().unwrap();
+        let document_kind = documents_guard.get_mut(self.document_key).unwrap();
 
-        let mut documents_guard = _context.documents.lock().unwrap();
-        let document = documents_guard.get_mut(self.document_key);
-
-        // FAIL here we have a catch-22 situation. we need to delegate to the right document implementation
-        //      but cannot pass the context because we need to borrow the documents from the context to find
-        //      out what type of document it is before we can delegate to it.
+        // delegate to the right document implementation, passing a `DocumentContext`.
+        // Note: we can't pass the context, as it's already mutably borrowed.
 
         let mut document_context = DocumentContext {
-            config: _context.config,
-            sender: _context.sender.clone(),
+            config: context.config,
+            sender: context.sender.clone(),
         };
 
-        match document {
-            Some(document_kind) => {
-                match document_kind {
-                    DocumentKind::TextDocument(document) => document.ui(ui, &mut document_context),
-                    DocumentKind::ImageDocument(document) => document.ui(ui, &mut document_context),
-                }
-            }
-            None => {
-                ui.label("unknown document key");
-            }
+        // Note: we specifically do NOT pass a `TabKey` to the document as the document should NOT know that it lives in a tab.
+        
+        match document_kind {
+            DocumentKind::TextDocument(document) => document.ui(ui, &mut document_context),
+            DocumentKind::ImageDocument(document) => document.ui(ui, &mut document_context),
         }
     }
 

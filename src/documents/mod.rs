@@ -1,4 +1,4 @@
-use std::sync::mpsc::Sender;
+use egui_inbox::UiInboxSender;
 use slotmap::new_key_type;
 use crate::app::{AppMessage, Config, MessageSource};
 use crate::documents::image::ImageDocument;
@@ -20,5 +20,5 @@ pub enum DocumentKind {
 
 pub struct DocumentContext<'a> {
     pub config: &'a mut Config,
-    pub sender: Sender<(MessageSource, AppMessage)>,
+    pub sender: UiInboxSender<(MessageSource, AppMessage)>,
 }

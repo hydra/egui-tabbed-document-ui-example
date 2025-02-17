@@ -1,5 +1,4 @@
 use std::path::PathBuf;
-use std::sync::mpsc::Sender;
 use crate::app::tabs::{Tab, TabKey};
 use egui::{Button, Response, RichText, TextEdit, Ui, Widget, WidgetText};
 use egui_i18n::{tr, translate_fluent};
@@ -8,7 +7,9 @@ use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, FlexDirect
 use egui_taffy::{taffy, tui, Tui, TuiBuilderLogic, TuiContainerResponse};
 use serde::{Deserialize, Serialize};
 use validator::{Validate, ValidationErrors};
-use crate::app::{AppMessage, DocumentArgs, MessageSource};
+// FIXME dependency on AppMessage and AppMessageSender here seems wrong.
+//       Feels like App should depend on new tab, new tab should not depend on App. 
+use crate::app::{AppMessage, AppMessageSender, DocumentArgs, MessageSource};
 use crate::context::Context;
 use crate::file_picker::Picker;
 use crate::i18n::fluent_argument_helpers;
@@ -275,7 +276,7 @@ impl<'a> Tab<Context<'a>> for NewTab {
 }
 
 impl NewTab {
-    fn on_submit(&mut self, tab_key: &TabKey, sender: &Sender<(MessageSource, AppMessage)>) {
+    fn on_submit(&mut self, tab_key: &TabKey, sender: &AppMessageSender) {
         println!("Submitted: {:?}", self.fields);
 
         if !self.fields.validate().is_ok() {

@@ -10,13 +10,15 @@ use egui_i18n::tr;
 use log::info;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use std::sync::mpsc::{Receiver, Sender};
+use egui_inbox::{UiInbox, UiInboxSender};
 use slotmap::SlotMap;
 use crate::app::app_tabs::document::DocumentTab;
 use crate::context::Context;
 use crate::documents::{DocumentKey, DocumentKind};
 use crate::documents::image::ImageDocument;
 use crate::documents::text::TextDocument;
+
+pub type AppMessageSender = UiInboxSender<(MessageSource, AppMessage)>;
 
 mod app_tabs;
 mod tabs;
@@ -40,19 +42,22 @@ struct AppState {
     startup_done: bool,
     file_picker: Picker,
 
-    sender: Sender<(MessageSource, AppMessage)>,
-    receiver: Receiver<(MessageSource, AppMessage)>,
+    sender: UiInboxSender<(MessageSource, AppMessage)>,
+    receiver: UiInbox<(MessageSource, AppMessage)>,
     documents: Arc<Mutex<SlotMap<DocumentKey, DocumentKind>>>,
 }
 
+#[derive(Debug)]
 pub enum AppMessage {
     CreateDocument(DocumentArgs)
 }
 
+#[derive(Debug)]
 pub enum MessageSource {
     Tab(TabKey)
 }
 
+#[derive(Debug)]
 pub struct DocumentArgs {
     name: String,
     directory: PathBuf,
@@ -96,7 +101,7 @@ impl Default for TemplateApp {
 
 impl AppState {
     pub fn init() -> Self {
-        let (sender, receiver) = std::sync::mpsc::channel();
+        let (sender, receiver) = UiInbox::channel();
 
         Self {
             startup_done: false,
@@ -393,8 +398,7 @@ impl eframe::App for TemplateApp {
             self.open_file(picked_file);
         }
 
-
-        let mut messages: Vec<(MessageSource, AppMessage)> = self.state().receiver.try_iter().collect();
+        let mut messages: Vec<(MessageSource, AppMessage)> = self.state().receiver.read(ctx).collect();
 
         for (source, message) in messages.drain(..) {
             match (source, message) {

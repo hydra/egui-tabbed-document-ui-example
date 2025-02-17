@@ -37,7 +37,6 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
 
         match document {
             Some(document_kind) => {
-                ui.label("loaded");
                 match document_kind {
                     DocumentKind::TextDocument(document) => document.ui(ui, &mut document_context),
                     DocumentKind::ImageDocument(document) => document.ui(ui, &mut document_context),

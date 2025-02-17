@@ -369,8 +369,13 @@ impl eframe::App for TemplateApp {
                 (MessageSource::Tab(tab_key), AppMessage::CreateDocument(args)) => {
                     // replace tabs here...
 
+                    let document_tab_kind = self.create_document_tab_inner(args);
+
                     if let Some(mut tab_kind) = self.tabs.get_mut(&tab_key) {
-                        *tab_kind = self.create_document_tab_inner(args);
+                        *tab_kind = document_tab_kind;
+                    } else {
+                        // message is sent from a tab that exists.
+                        unreachable!()
                     }
                 },
                 // (_, AppMessage::CreateDocument(args)) => {

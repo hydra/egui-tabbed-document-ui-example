@@ -42,11 +42,11 @@
       - Runtime tab state
         - [x] The form field values.
       - When OK is pressed
-        - [ ] the tab name should be updated to the name of the file.
+        - [x] the tab name should be updated to the name of the file.
         - [ ] a file should be created with the appropriate extension.
-        - [ ] it's content should be displayed in the same tab, see tab content below.
-        - [ ] there should be no visible removal and insertion of any new tab.
-        - [ ] tab ordering must be preserved.  e.g. given tabs 'File1, New, File2' pressing 'Ok' on `New` should result in tabs 'File1, File3, File2', not 'File1, File2, File3'
+        - [x] it's content should be displayed in the same tab, see tab content below.
+        - [x] there should be no visible removal and insertion of any new tab.
+        - [x] tab ordering must be preserved.  e.g. given tabs 'File1, New, File2' pressing 'Ok' on `New` should result in tabs 'File1, File3, File2', not 'File1, File2, File3'
     - 'Text' tab, displays a 'text' document.
       - [ ] Filename must appear in tab.
       - [ ] Show text file content in an editor.

@@ -2,7 +2,7 @@ use std::collections::btree_map::{Iter, IterMut};
 use crate::app::app_tabs::TabKind;
 use egui::{Id, Ui, WidgetText};
 use egui_dock::TabViewer;
-use log::debug;
+use log::{debug, info};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use crate::app::AppMessage;
@@ -56,6 +56,17 @@ impl Tabs {
 
     pub fn iter_mut(&mut self) -> IterMut<TabKey, TabKind> {
         self.tabs.iter_mut()
+    }
+
+    pub fn retain_all(&mut self, tab_keys: &[TabKey]) {
+        self.tabs.retain(|tab_key, _| {
+            let retain = tab_keys.contains(tab_key);
+            
+            if !retain {
+                info!("Removing orphaned tab. key: {:?}", tab_key);
+            }
+            retain
+        });
     }
 }
 

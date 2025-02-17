@@ -246,6 +246,17 @@ impl TemplateApp {
         }
     }
 
+    /// Due to bugs in egui_dock where it doesn't call `on_close` when closing tabs, it's possible that the tabs
+    /// and the dock tree are out of sync.  `on_close` should be removing elements from `self.tabs` corresponding to the
+    /// tab being closed, but because it is not called there can be orphaned elements, we need to find and remove them.
+    pub fn cleanup_tabs(&mut self) {
+        let known_tab_keys = self.tree.iter_all_tabs().map(|(_surface_and_node, tab_key)| {
+            tab_key.clone()
+        }).collect::<Vec<_>>();
+        
+        self.tabs.retain_all(&known_tab_keys);
+    }
+
     /// when the app starts up, the documents will be empty, and the document tabs will have keys that don't exist
     /// in the documents list (because it's empty now).
     /// we have to find these tabs, create documents, store them in the map and replace the tab's document key
@@ -282,6 +293,8 @@ impl TemplateApp {
             let new_key = self.state().documents.lock().unwrap().insert(document);
             if let TabKind::Document(ref mut document_tab) = self.tabs.get_mut(&tab_key).unwrap() {
                 document_tab.document_key = new_key;
+            } else {
+                unreachable!()
             }
         }
     }
@@ -350,6 +363,9 @@ impl eframe::App for TemplateApp {
             self.show_home_tab_on_startup();
             self.restore_documents_on_startup();
         }
+
+        // FIXME remove this when `on_close` bugs in egui_dock are fixed. 
+        self.cleanup_tabs();
 
         // TODO discover whether cloning a sender is expensive or not
         let sender = self.state().sender.clone();

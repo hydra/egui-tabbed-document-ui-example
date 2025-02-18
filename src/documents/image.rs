@@ -67,7 +67,10 @@ impl ImageDocument {
                 None => {
                     panic!("Failed to load image");
                 }
-                Some(result) => result
+                Some(result) => {
+                    info!("Image loaded. texture_id: {:?}", result.id());
+                    result
+                }
             }
 
             /*
@@ -176,8 +179,8 @@ impl ImageDocument {
 
     fn content_ui(&mut self, ui: &mut Ui) {
         if let Some(texture_handle) = self.loader.content_mut() {
+            debug!("image loaded");;
             egui::Frame::new().show(ui, |ui|{
-
 
                 let image_source = ImageSource::Texture(SizedTexture::from_handle(&texture_handle));
 
@@ -186,7 +189,8 @@ impl ImageDocument {
                 ui.add_sized(ui.available_size(), image);
             });
         } else {
-            ui.spinner();
+            debug!("image loading");;
+            //ui.spinner();
             ui.label(tr!("file-loading"));
         }
     }

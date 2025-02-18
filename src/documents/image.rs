@@ -1,36 +1,49 @@
 use crate::documents::{DocumentContext, DocumentKey};
-use egui::{frame, Ui};
+use egui::{frame, Image, TextureId, Ui, Vec2, Widget};
 use std::path::PathBuf;
 use eframe::epaint::Margin;
+use egui::load::SizedTexture;
 use egui_i18n::tr;
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent};
 use egui_taffy::taffy::{AlignItems, Display, FlexDirection, Size, Style};
 use egui_taffy::{tui, TuiBuilderLogic};
+use log::info;
+use url::Url;
 use crate::app::{AppMessage, AppMessageSender, MessageSource};
 use crate::documents::loader::DocumentContent;
 
 pub struct ImageDocument {
     pub path: PathBuf,
 
-    // TODO change to an image, not string
-    loader: DocumentContent<String>,
+    loader: DocumentContent<Image<'static>>,
 }
 
 impl ImageDocument {
     pub fn create_new(path: PathBuf) -> Self {
+
+        let texture = SizedTexture::new(TextureId::User(1), Vec2 { x: 100.0, y: 100.0 });
+        let image = Image::from_texture(texture);
+
         Self {
             path,
-            loader: DocumentContent::new("example content".to_string()),
+            loader: DocumentContent::new(image),
         }
     }
 
     pub fn from_path(path: PathBuf, document_key: DocumentKey, sender: AppMessageSender) -> Self {
         let message = (MessageSource::Document(document_key), AppMessage::Refresh);
         let loader = DocumentContent::load(path.clone(), message, sender, |path| {
-            std::fs::read_to_string(path).unwrap()
+            let url = Url::from_file_path(path).unwrap();
+            let uri = url.to_string();
+            info!("uri: {}", uri);
+
+            Image::from_uri(uri)
         });
 
-        Self { path, loader }
+        Self {
+            path,
+            loader,
+        }
     }
 
     pub fn ui<'a>(&mut self, ui: &mut Ui, _context: &mut DocumentContext<'a>) {
@@ -111,7 +124,11 @@ impl ImageDocument {
 
     fn content_ui(&mut self, ui: &mut Ui) {
         if let Some(content) = self.loader.content_mut() {
-            ui.label("<IMAGE HERE>");
+            egui::Frame::new().show(ui, |ui|{
+                // FIXME it's probably bad to clone the image...
+                let image = content.clone();
+                ui.add_sized(ui.available_size(), image);
+            });
         } else {
             ui.spinner();
             ui.label(tr!("file-loading"));

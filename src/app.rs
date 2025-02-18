@@ -17,9 +17,10 @@ use slotmap::SlotMap;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
+use egui_extras::install_image_loaders;
 
 const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
-const SUPPORTED_IMAGE_EXTENSIONS: [&'static str; 1] = ["bmp"];
+const SUPPORTED_IMAGE_EXTENSIONS: [&'static str; 4] = ["bmp", "png", "jpeg", "jpg"];
 
 
 pub type AppMessageSender = UiInboxSender<(MessageSource, AppMessage)>;
@@ -126,6 +127,8 @@ impl TemplateApp {
         // This is also where you can customize the look and feel of egui using
         // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
         fonts::initialize(&cc.egui_ctx);
+
+        install_image_loaders(&cc.egui_ctx);
 
         // Load previous app state (if any).
         // Note that you must enable the `persistence` feature for this to work.

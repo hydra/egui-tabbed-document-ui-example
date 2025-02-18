@@ -132,67 +132,75 @@ impl TextDocument {
             //.max_width(200.)
             .frame(frame)
             .show_inside(ui, |ui| {
-                tui(ui, ui.id().with("grid"))
-                    .reserve_available_width()
-                    .style(Style {
-                        align_items: Some(AlignItems::Stretch),
-                        flex_direction: FlexDirection::Column,
-                        size: Size {
-                            width: percent(1.),
-                            height: auto(),
-                        },
-                        padding: length(0.),
-                        gap: length(0.),
-                        ..default_style()
-                    })
-                    .show(|tui| {
 
-                        tui
-                            .style(Style {
-                                flex_grow: 1.0,
-                                display: Display::Grid,
-                                grid_template_columns: vec![fit_content(percent(1.)), fr(1.)],
-                                grid_template_rows: vec![fr(1.), fr(1.)],
-
-                                // ensure items are centered vertically on rows
-                                align_items: Some(AlignItems::Center),
-                                padding: length(0.),
-                                margin: length(0.),
-                                ..default_style()
-                            })
-                            .add(|tui| {
-                                tui.style(Style { ..default_style() })
-                                    .add_with_border(|tui| {
-                                        tui.label(tr!("document-sidebar-file-path"));
-                                    });
-                                tui.style(Style {
+                egui::ScrollArea::both().show(ui, |ui| {
+                    
+                    tui(ui, ui.id().with("grid"))
+                        .reserve_available_width()
+                        .style(Style {
+                            align_items: Some(AlignItems::Stretch),
+                            flex_direction: FlexDirection::Column,
+                            size: Size {
+                                width: percent(1.),
+                                height: auto(),
+                            },
+                            padding: length(0.),
+                            gap: length(0.),
+                            ..default_style()
+                        })
+                        .show(|tui| {
+    
+                            tui
+                                .style(Style {
                                     flex_grow: 1.0,
+                                    display: Display::Grid,
+                                    grid_template_columns: vec![fit_content(percent(1.)), fr(1.)],
+                                    grid_template_rows: vec![fr(1.), fr(1.)],
+    
+                                    // ensure items are centered vertically on rows
+                                    align_items: Some(AlignItems::Center),
+                                    padding: length(0.),
+                                    margin: length(0.),
                                     ..default_style()
                                 })
-                                    .add_with_border(|tui| {
-                                        // tui.wrap_mode(egui::TextWrapMode::Truncate).add(|tui| {
-                                        //     tui.label(self.path.display().to_string());
-                                        // });
-                                        //tui.egui_style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
-                                        //tui.ui_add(egui::Label::new(self.path.display().to_string()))
-
-                                        tui.ui_add(egui::Label::new(self.path.display().to_string()))
-                                    });
-                                tui.style(Style { ..default_style() })
-                                    .add_with_border(|tui| {
-                                        tui.label(tr!("document-sidebar-text-length"));
-                                    });
-                                tui.style(Style {
-                                    flex_grow: 1.0,
-                                    ..default_style()
-                                })
-                                    .add_with_border(|tui| {
-                                        let label_content = self.loader.content()
-                                            .map_or(tr!("generic-unknown-value"), |content|content.len().to_string());
-                                        tui.label(label_content);
-                                    });
-                            });
-                    });
+                                .add(|tui| {
+                                    tui.style(Style { ..default_style() })
+                                        .add_with_border(|tui| {
+                                            tui.label(tr!("document-sidebar-file-path"));
+                                        });
+                                    tui.style(Style {
+                                        flex_grow: 1.0,
+                                        ..default_style()
+                                    })
+                                        .add_with_border(|tui| {
+                                            // tui.wrap_mode(egui::TextWrapMode::Truncate).add(|tui| {
+                                            //     tui.label(self.path.display().to_string());
+                                            // });
+                                            //tui.egui_style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+                                            //tui.ui_add(egui::Label::new(self.path.display().to_string()))
+    
+                                            tui.ui_add(egui::Label::new(self.path.display().to_string()))
+                                        });
+                                    tui.style(Style { ..default_style() })
+                                        .add_with_border(|tui| {
+                                            tui.label(tr!("document-sidebar-text-length"));
+                                        });
+                                    tui.style(Style {
+                                        flex_grow: 1.0,
+                                        ..default_style()
+                                    })
+                                        .add_with_border(|tui| {
+                                            let label_content = self.loader.content()
+                                                .map_or(tr!("generic-unknown-value"), |content|content.len().to_string());
+                                            tui.label(label_content);
+                                        });
+                                    // end of grid content
+                                });
+                            // end of container content 
+                        });
+                    // end of scroll content
+                });
+                // end of sidebar content
             });
 
         egui::CentralPanel::default().show_inside(ui, |ui| {

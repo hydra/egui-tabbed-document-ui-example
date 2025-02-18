@@ -120,7 +120,7 @@ impl ImageDocument {
         frame.outer_margin = Margin::same(0);
         frame.inner_margin = Margin::same(0);
 
-        egui::SidePanel::left("sidebar")
+        egui::SidePanel::left(ui.id().with("sidebar"))
             .resizable(true)
             .frame(frame)
             .show_inside(ui, |ui| {

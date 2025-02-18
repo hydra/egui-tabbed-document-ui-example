@@ -1,5 +1,4 @@
 use crate::app::app_tabs::TabKind;
-use crate::app::AppMessage;
 use crate::context::Context;
 use egui::{Id, Ui, WidgetText};
 use egui_dock::TabViewer;
@@ -17,6 +16,7 @@ pub struct Tabs {
     tabs: BTreeMap<TabKey, TabKind>,
 }
 
+#[allow(dead_code)]
 impl Tabs {
     fn next_key(&mut self) -> TabKey {
         loop {
@@ -50,11 +50,11 @@ impl Tabs {
         }
     }
 
-    pub fn iter(&self) -> Iter<TabKey, TabKind> {
+    pub fn iter<'a>(&'a self) -> Iter<'a, TabKey, TabKind> {
         self.tabs.iter()
     }
 
-    pub fn iter_mut(&mut self) -> IterMut<TabKey, TabKind> {
+    pub fn iter_mut<'a>(&'a mut self) -> IterMut<'a, TabKey, TabKind> {
         self.tabs.iter_mut()
     }
 
@@ -80,7 +80,13 @@ pub trait Tab<App> {
     fn label(&self) -> WidgetText;
     fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, app: &mut App);
 
-    fn on_close(&mut self, tab_key: &mut TabKey, app: &mut App) -> bool {
+    // handle a tab being closed
+    // this is where any per-tab clean-up code should be performed
+    //
+    // return 'true' to allow the tab to be closed, 'false' to prevent closing.
+    // FIXME due to bugs in egui_dock, this is not always called, see related FIXMEs in the codebase
+    //       do NOT rely on this method for now, workarounds are required.
+    fn on_close(&mut self, _tab_key: &mut TabKey, _app: &mut App) -> bool {
         true
     }
 }

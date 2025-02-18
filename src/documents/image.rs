@@ -1,4 +1,3 @@
-use crate::context::Context;
 use crate::documents::DocumentContext;
 use egui::Ui;
 use std::path::PathBuf;

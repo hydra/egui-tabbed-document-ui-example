@@ -3,8 +3,8 @@ use crate::documents::{DocumentContext, DocumentKey};
 use egui::{frame, Margin, TextEdit, Ui};
 use egui_i18n::tr;
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent};
-use egui_taffy::taffy::{AlignItems, Display, FlexDirection, FlexWrap, Style};
-use egui_taffy::{taffy, tui, TuiBuilderLogic};
+use egui_taffy::taffy::{AlignItems, Display, FlexDirection, FlexWrap, Size, Style};
+use egui_taffy::{taffy, tui, TuiBuilderLogic, TuiWidget};
 use log::info;
 use std::path::PathBuf;
 use std::thread;
@@ -129,6 +129,7 @@ impl TextDocument {
         
         egui::SidePanel::left("sidebar")
             .resizable(true)
+            //.max_width(200.)
             .frame(frame)
             .show_inside(ui, |ui| {
                 tui(ui, ui.id().with("grid"))
@@ -136,7 +137,7 @@ impl TextDocument {
                     .style(Style {
                         align_items: Some(AlignItems::Stretch),
                         flex_direction: FlexDirection::Column,
-                        size: taffy::Size {
+                        size: Size {
                             width: percent(1.),
                             height: auto(),
                         },
@@ -169,7 +170,13 @@ impl TextDocument {
                                     ..default_style()
                                 })
                                     .add_with_border(|tui| {
-                                        tui.label(self.path.display().to_string());
+                                        // tui.wrap_mode(egui::TextWrapMode::Truncate).add(|tui| {
+                                        //     tui.label(self.path.display().to_string());
+                                        // });
+                                        //tui.egui_style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+                                        //tui.ui_add(egui::Label::new(self.path.display().to_string()))
+
+                                        tui.ui_add(egui::Label::new(self.path.display().to_string()))
                                     });
                                 tui.style(Style { ..default_style() })
                                     .add_with_border(|tui| {

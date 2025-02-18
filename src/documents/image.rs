@@ -102,6 +102,8 @@ impl ImageDocument {
     }
 
     pub fn ui<'a>(&mut self, ui: &mut Ui, _context: &mut DocumentContext<'a>) {
+        self.loader.update();
+
         ui.ctx().style_mut(|style| {
             // if this is not done, text in labels/checkboxes/etc wraps
             style.wrap_mode = Some(egui::TextWrapMode::Extend);

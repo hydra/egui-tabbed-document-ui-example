@@ -187,7 +187,7 @@ impl TemplateApp {
         }
     }
 
-    fn open_file(&mut self, path: PathBuf) {
+    fn open_file(&mut self, ctx: &egui::Context, path: PathBuf) {
         info!("open file. path: {:?}", path);
 
         let title = path.file_name().unwrap().to_string_lossy().to_string();
@@ -198,7 +198,7 @@ impl TemplateApp {
             let sender = sender.clone();
 
             |new_key| {
-                Self::document_from_path(&path, sender, new_key)
+                Self::document_from_path(&path, ctx, sender, new_key)
             }
         });
         let tab_kind = TabKind::Document(DocumentTab::new(title, path, document_key));
@@ -294,7 +294,7 @@ impl TemplateApp {
     /// with the new key generated when adding the key to the map
     ///
     /// Safety: call only once on startup, before the tabs are shown.
-    fn restore_documents_on_startup(&mut self) {
+    fn restore_documents_on_startup(&mut self, ctx: &egui::Context) {
         // we have to do this as a two-step process to above borrow-checker issues
 
         // step 1 - find the document tabs, return the tab keys and paths.
@@ -316,7 +316,7 @@ impl TemplateApp {
             let new_key = self.state().documents.lock().unwrap().insert_with_key({
                 let sender = sender.clone();
                 |new_key| {
-                    Self::document_from_path(&path, sender, new_key)
+                    Self::document_from_path(&path, ctx, sender, new_key)
                 }
             });
             if let TabKind::Document(ref mut document_tab) = self.tabs.get_mut(&tab_key).unwrap() {
@@ -327,14 +327,14 @@ impl TemplateApp {
         }
     }
 
-    fn document_from_path(path: &PathBuf, sender: UiInboxSender<(MessageSource, AppMessage)>, new_key: DocumentKey) -> DocumentKind {
+    fn document_from_path(path: &PathBuf, ctx: &egui::Context, sender: UiInboxSender<(MessageSource, AppMessage)>, new_key: DocumentKey) -> DocumentKind {
         let extension = path.extension().unwrap().to_str().unwrap();
 
         if SUPPORTED_TEXT_EXTENSIONS.contains(&extension) {
-            let text_document = TextDocument::from_path(path.clone(), new_key, sender);
+            let text_document = TextDocument::from_path(path.clone(), ctx, new_key, sender);
             DocumentKind::TextDocument(text_document)
         } else if SUPPORTED_IMAGE_EXTENSIONS.contains(&extension) {
-            let image_document = ImageDocument::from_path(path.clone(), new_key, sender);
+            let image_document = ImageDocument::from_path(path.clone(), ctx, new_key, sender);
             DocumentKind::ImageDocument(image_document)
         } else {
             todo!()
@@ -432,7 +432,7 @@ impl eframe::App for TemplateApp {
             self.state().startup_done = true;
 
             self.show_home_tab_on_startup();
-            self.restore_documents_on_startup();
+            self.restore_documents_on_startup(ctx);
         }
 
         // FIXME remove this when `on_close` bugs in egui_dock are fixed.
@@ -460,7 +460,7 @@ impl eframe::App for TemplateApp {
         if let Ok(picked_file) = self.state().file_picker.picked() {
             // FIXME this `update` method does not get called immediately after picking a file, instead update gets
             //       called when the user moves the mouse or interacts with the window again.
-            self.open_file(picked_file);
+            self.open_file(ctx, picked_file);
         }
     }
 }

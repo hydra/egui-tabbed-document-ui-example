@@ -38,10 +38,12 @@ impl<T: Send + 'static> DocumentContent<T> {
 
     pub fn load(
         path: PathBuf,
+        ctx: &egui::Context,
         on_loaded_message: (MessageSource, AppMessage),
         sender: AppMessageSender,
-        load_fn: fn(path_buf: PathBuf) -> T,
+        load_fn: fn(path_buf: PathBuf, ctx: &egui::Context) -> T,
     ) -> Self {
+        let ctx = ctx.clone();
         let handle = thread::Builder::new()
             .name(format!("loader: {:?}", path))
             .spawn(move || {
@@ -52,7 +54,7 @@ impl<T: Send + 'static> DocumentContent<T> {
                 // to have the UI update when loading is complete.
                 thread::sleep(Duration::from_secs(1));
 
-                let content: T = load_fn(path);
+                let content: T = load_fn(path, &ctx);
 
                 // send a message via the sender to cause the UI to be updated when loading is complete.
                 sender.send(on_loaded_message).expect("sent");

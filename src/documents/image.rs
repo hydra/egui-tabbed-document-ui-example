@@ -1,14 +1,16 @@
 use crate::documents::{DocumentContext, DocumentKey};
-use egui::{epaint, frame, Color32, ColorImage, Image, ImageData, TextureId, TextureOptions, Ui, Vec2, Widget};
+use egui::{epaint, frame, Color32, ColorImage, Context, Image, ImageData, ImageSource, SizeHint, TextureHandle, TextureId, TextureOptions, Ui, Vec2, Widget};
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::thread;
+use std::time::Duration;
 use eframe::epaint::Margin;
 use egui::load::SizedTexture;
 use egui_i18n::tr;
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent};
 use egui_taffy::taffy::{AlignItems, Display, FlexDirection, Size, Style};
 use egui_taffy::{tui, TuiBuilderLogic};
-use log::info;
+use log::{debug, info};
 use url::Url;
 use crate::app::{AppMessage, AppMessageSender, MessageSource};
 use crate::documents::loader::DocumentContent;
@@ -16,7 +18,7 @@ use crate::documents::loader::DocumentContent;
 pub struct ImageDocument {
     pub path: PathBuf,
 
-    loader: DocumentContent<egui::TextureHandle>,
+    loader: DocumentContent<(ImageSource<'static>, Option<TextureHandle>)>,
 }
 
 impl ImageDocument {
@@ -29,21 +31,36 @@ impl ImageDocument {
             image_data,
             Default::default()
         );
+        
+        let image_source = ImageSource::Texture(SizedTexture::from_handle(&texture_handle));
 
         Self {
             path,
-            loader: DocumentContent::new(texture_handle),
+            loader: DocumentContent::new((image_source, Some(texture_handle))),
         }
     }
 
-    pub fn from_path(path: PathBuf, document_key: DocumentKey, sender: AppMessageSender) -> Self {
+    pub fn from_path(path: PathBuf, ctx: &Context, document_key: DocumentKey, sender: AppMessageSender) -> Self {
         let message = (MessageSource::Document(document_key), AppMessage::Refresh);
-        let loader = DocumentContent::load(path.clone(), message, sender, |path| {
+        let loader = DocumentContent::load(path.clone(), ctx, message, sender, move |path, ctx| {
             let url = Url::from_file_path(path).unwrap();
             let uri = url.to_string();
             info!("uri: {}", uri);
-
-            todo!()
+            
+            let result = ctx.try_load_texture(url.as_str(), TextureOptions::default(), SizeHint::default());
+            let actual_result = result.unwrap();
+            while actual_result.size().is_none() && actual_result.texture_id().is_none() {
+                // FIXME what will make the result non-null? do we have to timeout? why why why why why!
+                debug!("waiting for image to load");
+                thread::sleep(Duration::from_millis(100));
+            }
+            let texture = SizedTexture::new(actual_result.texture_id().unwrap(), actual_result.size().unwrap());
+            
+            let image_source = ImageSource::Texture(texture);
+            let result = (image_source, None);
+            info!("source: {:?}", result.0);
+            
+            result
         });
 
         Self {
@@ -129,15 +146,11 @@ impl ImageDocument {
     }
 
     fn content_ui(&mut self, ui: &mut Ui) {
-        if let Some(texture) = self.loader.content_mut() {
+        if let Some((image_source, maybe_texture)) = self.loader.content_mut() {
             egui::Frame::new().show(ui, |ui|{
-
-                let image_source = (texture.id(), texture.size_vec2());
-                
-                let image = Image::new(image_source);
+                let image = Image::new(image_source.clone());
                 
                 ui.add_sized(ui.available_size(), image);
-                
             });
         } else {
             ui.spinner();

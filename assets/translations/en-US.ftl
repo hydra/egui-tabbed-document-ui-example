@@ -25,3 +25,8 @@ form-common-button-cancel = Cancel
 
 form-common-combo-default = -- Select --
 form-common-error-required = Required
+
+document-sidebar-file-path = Path
+document-sidebar-text-length = Length
+
+generic-unknown-value = Unknown

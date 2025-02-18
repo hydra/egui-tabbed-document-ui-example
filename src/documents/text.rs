@@ -3,13 +3,15 @@ use crate::documents::{DocumentContext, DocumentKey};
 use egui::{frame, Margin, TextEdit, Ui};
 use egui_i18n::tr;
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent};
-use egui_taffy::taffy::{AlignItems, Display, FlexDirection, Style};
+use egui_taffy::taffy::{AlignItems, Display, FlexDirection, FlexWrap, Style};
 use egui_taffy::{taffy, tui, TuiBuilderLogic};
 use log::info;
 use std::path::PathBuf;
 use std::thread;
 use std::thread::JoinHandle;
 use std::time::Duration;
+use egui::accesskit::TextAlign;
+use crate::context;
 
 pub struct TextDocument {
     pub path: PathBuf,
@@ -27,6 +29,13 @@ struct TextDocumentContent {
 }
 
 impl TextDocumentContent {
+    fn content(&self) -> Option<&String> {
+        match &self.state {
+            LoaderState::Loaded(content) => Some(content),
+            _ => None,
+        }
+    }
+
     fn content_mut(&mut self) -> Option<&mut String> {
         match &mut self.state {
             LoaderState::Loaded(content) => Some(content),
@@ -153,14 +162,27 @@ impl TextDocument {
                             .add(|tui| {
                                 tui.style(Style { ..default_style() })
                                     .add_with_border(|tui| {
-                                        tui.label("left");
+                                        tui.label(tr!("document-sidebar-file-path"));
                                     });
                                 tui.style(Style {
                                     flex_grow: 1.0,
                                     ..default_style()
                                 })
                                     .add_with_border(|tui| {
-                                        tui.label("right");
+                                        tui.label(self.path.display().to_string());
+                                    });
+                                tui.style(Style { ..default_style() })
+                                    .add_with_border(|tui| {
+                                        tui.label(tr!("document-sidebar-text-length"));
+                                    });
+                                tui.style(Style {
+                                    flex_grow: 1.0,
+                                    ..default_style()
+                                })
+                                    .add_with_border(|tui| {
+                                        let label_content = self.loader.content()
+                                            .map_or(tr!("generic-unknown-value"), |content|content.len().to_string());
+                                        tui.label(label_content);
                                     });
                             });
                     });

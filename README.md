@@ -18,15 +18,15 @@
   - [ ] Language dropdown, choose between at least 2 languages (e.g. English and Spanish).
     - [ ] Changing the language should cause all UI text to be immediately displayed in the selected language without requiring a restart.
 - Tab bar
-  - [ ] When all the tabs won't fit in the window, there must be some controls to allow them all to be selected, e.g. `<` and `>` buttons, or `V` dropdown, or scrollable.
+  - [x] When all the tabs won't fit in the window, there must be some controls to allow them all to be selected, e.g. `<` and `>` buttons, or `V` dropdown, or scrollable.
   - [x] Selecting a tab changes the content area below the tab bar.
   - [x] Must be obvious which tab is selected when there are only two tabs.
   - [x] Each tab should be closable (e.g. an `X` button on the tab or right-click on tab to show a context menu with `Close`)
-  - [ ] When a tab is closed, the next most recently used tab is made active.
+  - [ ] When a tab is closed, the next most recently used tab is made active. ❌ needs a PR to `egui_dock`
 - Tab content
   - [x] Displays the content for the tab.
   - [x] Each tab content must maintain it's state, without expensive re-loads/refreshing of the state, no re-loading of files.
-  - [ ] Scroll bars should appear if the content does not fit the window.
+  - [x] Scroll bars should appear if the content does not fit the window. 
   - Tabs
     - 'Home' tab
       - [x] Shows a welcome message.
@@ -52,12 +52,12 @@
       - [x] Show text file content in an editor.
       - [x] Content must be loaded in a thread or async, in the background.
       - Tab State
-        - [ ] Maintain text selection.
-        - [ ] Maintain caret position.
+        - [ ] Maintain text selection. ❌ Text selection is lost when changing tabs.
+        - [ ] Maintain caret position. ❌ Caret position and focus is lost when changing tabs.
       - Info sidebar with a grid of key/value items
-        - [ ] File path.
-        - [ ] Length of document.
-        - [ ] Selection information.
+        - [x] File path.
+        - [x] Length of document.
+        - [ ] Selection information. ❌ egui `TextEdit` API doesn't support this.
     - 'Image' tab, displays an 'image' document.
       - [ ] Filename must appear in tab.
       - [ ] Shows the image.
@@ -77,24 +77,24 @@
     - [x] 'Open home tab on startup', boolean, initially true.
       - [x] If true, open the 'Home' tab on startup.
       - [x] If false, the 'Home' tab should not be displayed (regardless of if the tab was open when the app was closed) 
-    - [ ] 'List of currently open files' (ignore `New` tabs), list of absolute filenames, initially empty.
-      - [ ] Create a tab for each file on startup.
+    - [x] 'List of currently open files' (ignore `New` tabs), list of absolute filenames, initially empty.
+      - [x] Create a tab for each file on startup.
 - Documents
   - 'text' - the text file.
   - 'image' - the image file.
 - Architecture
   - [ ] Code should be written in such a way that multiple-developers can work on different aspects of the codebase without creating merge-conflicts. i.e. use modules, avoid tight-coupling, good compile-time dependencies, etc.
-  - [ ] The application itself must own the documents (images, text), not the tabs themselves.
+  - [x] The application itself must own the documents (images, text), not the tabs themselves.
   - [ ] When the last tab for a document is closed, the document should be dropped/closed.
 - Bonus points
-  - [ ] Native look and feel controls.
-  - [ ] Some way of closing all the tabs in one go (e.g. "Close all" button on toolbar).
+  - [ ] Native look and feel controls. ❌ egui has a non-native style.
+  - [x] Some way of closing all the tabs in one go (e.g. "Close all" button on toolbar). 
   - [ ] Add 'Display in window' on tab context menu which when clicked displays the document in a new window with no tab bar, and where the window title is the name of the file.
   - [ ] Multiple tabs for the same document, e.g. right-click a tab, click 'Duplicate'.  Changes in one tab are reflected in the other.
   - [ ] Status bar, showing some active-tab-specific state, e.g. last click location on image tabs. changes when changing tabs. (e.g. IDEs often show line number, offset, and selected line/character counts in the status bar).
   - [ ] When two tabs are open, where the file name names of the document are the same, but the directory the file is in is different, show enough of the path to be able to distinguish the two tabs.
     - e.g. for `/tmp/foobar/file.txt` and `/tmp/barfoo/file.txt` instead of (`file.txt` & `file.txt`) show (`foobar/file.txt` & `barfoo/file.txt`)
     - doing this forces the tab system to be able to access other tab names and change them all, dynamically, when one tab is added or when one is updated.
-  - [ ] Draggable divider between sidebar and content.
+  - [x] Draggable divider between sidebar and content.
   - [ ] Tests for individual components.
-  - [ ] Integration/Behavioral tests.~~
+  - [ ] Integration/Behavioral tests.

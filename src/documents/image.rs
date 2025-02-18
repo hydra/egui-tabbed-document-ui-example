@@ -183,9 +183,7 @@ impl ImageDocument {
         if let Some(texture_handle) = self.loader.content_mut() {
             debug!("image loaded");;
             egui::Frame::new().show(ui, |ui|{
-
                 let image_source = ImageSource::Texture(SizedTexture::from_handle(&texture_handle));
-
                 let image = Image::new(image_source.clone());
 
                 ui.add_sized(ui.available_size(), image);

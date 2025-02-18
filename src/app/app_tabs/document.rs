@@ -19,11 +19,6 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
     }
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context<'a>) {
-        ui.label(format!(
-            "path: {:?}, key: {:?}",
-            self.path, self.document_key
-        ));
-
         // get the document, this will fail if the document has not been restored on application startup.
         let mut documents_guard = context.documents.lock().unwrap();
         let document_kind = documents_guard.get_mut(self.document_key).unwrap();

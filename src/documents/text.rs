@@ -1,7 +1,10 @@
 use crate::app::{AppMessage, AppMessageSender, MessageSource};
 use crate::documents::{DocumentContext, DocumentKey};
-use egui::Ui;
+use egui::{frame, Margin, TextEdit, Ui};
 use egui_i18n::tr;
+use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent};
+use egui_taffy::taffy::{AlignItems, Display, FlexDirection, Style};
+use egui_taffy::{taffy, tui, TuiBuilderLogic};
 use log::info;
 use std::path::PathBuf;
 use std::thread;
@@ -99,12 +102,88 @@ impl TextDocument {
     pub fn ui<'a>(&mut self, ui: &mut Ui, _context: &mut DocumentContext<'a>) {
         self.loader.update();
 
-        if let Some(content) = self.loader.content_mut() {
-            ui.text_edit_multiline(content);
-        } else {
-            ui.label(tr!("file-loading"));
-        }
+        ui.ctx().style_mut(|style| {
+            // if this is not done, text in labels/checkboxes/etc wraps
+            style.wrap_mode = Some(egui::TextWrapMode::Extend);
+            style.spacing.window_margin = Margin::same(0);
+        });
+
+        let default_style = || Style {
+            padding: length(2.),
+            gap: length(2.),
+            ..Default::default()
+        };
+        
+        let mut frame = frame::Frame::new();
+        frame.outer_margin = Margin::same(0);
+        frame.inner_margin = Margin::same(0);
+        
+        egui::SidePanel::left("sidebar")
+            .resizable(true)
+            .frame(frame)
+            .show_inside(ui, |ui| {
+                tui(ui, ui.id().with("grid"))
+                    .reserve_available_width()
+                    .style(Style {
+                        align_items: Some(AlignItems::Stretch),
+                        flex_direction: FlexDirection::Column,
+                        size: taffy::Size {
+                            width: percent(1.),
+                            height: auto(),
+                        },
+                        padding: length(0.),
+                        gap: length(0.),
+                        ..default_style()
+                    })
+                    .show(|tui| {
+
+                        tui
+                            .style(Style {
+                                flex_grow: 1.0,
+                                display: Display::Grid,
+                                grid_template_columns: vec![fit_content(percent(1.)), fr(1.)],
+                                grid_template_rows: vec![fr(1.), fr(1.)],
+
+                                // ensure items are centered vertically on rows
+                                align_items: Some(AlignItems::Center),
+                                padding: length(0.),
+                                margin: length(0.),
+                                ..default_style()
+                            })
+                            .add(|tui| {
+                                tui.style(Style { ..default_style() })
+                                    .add_with_border(|tui| {
+                                        tui.label("left");
+                                    });
+                                tui.style(Style {
+                                    flex_grow: 1.0,
+                                    ..default_style()
+                                })
+                                    .add_with_border(|tui| {
+                                        tui.label("right");
+                                    });
+                            });
+                    });
+            });
+
+        egui::CentralPanel::default().show_inside(ui, |ui| {
+            // ui.vertical_centered(|ui| {
+            //     ui.heading("Central Panel");
+            // });
+            egui::ScrollArea::vertical().show(ui, |ui| {
+                self.content_ui(ui);
+            });
+        });
 
         // todo, use something from the context, e.g. the `Config`.
+    }
+
+    fn content_ui(&mut self, ui: &mut Ui) {
+        if let Some(content) = self.loader.content_mut() {
+            ui.add_sized(ui.available_size(), TextEdit::multiline(content));
+        } else {
+            ui.spinner();
+            ui.label(tr!("file-loading"));
+        }
     }
 }

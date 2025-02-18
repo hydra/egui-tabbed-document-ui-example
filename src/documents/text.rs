@@ -129,7 +129,6 @@ impl TextDocument {
         
         egui::SidePanel::left("sidebar")
             .resizable(true)
-            //.max_width(200.)
             .frame(frame)
             .show_inside(ui, |ui| {
 
@@ -173,12 +172,6 @@ impl TextDocument {
                                         ..default_style()
                                     })
                                         .add_with_border(|tui| {
-                                            // tui.wrap_mode(egui::TextWrapMode::Truncate).add(|tui| {
-                                            //     tui.label(self.path.display().to_string());
-                                            // });
-                                            //tui.egui_style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
-                                            //tui.ui_add(egui::Label::new(self.path.display().to_string()))
-    
                                             tui.ui_add(egui::Label::new(self.path.display().to_string()))
                                         });
                                     tui.style(Style { ..default_style() })
@@ -204,9 +197,6 @@ impl TextDocument {
             });
 
         egui::CentralPanel::default().show_inside(ui, |ui| {
-            // ui.vertical_centered(|ui| {
-            //     ui.heading("Central Panel");
-            // });
             egui::ScrollArea::vertical().show(ui, |ui| {
                 self.content_ui(ui);
             });

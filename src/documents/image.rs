@@ -1,6 +1,7 @@
 use crate::documents::{DocumentContext, DocumentKey};
-use egui::{frame, Image, TextureId, Ui, Vec2, Widget};
+use egui::{epaint, frame, Color32, ColorImage, Image, ImageData, TextureId, TextureOptions, Ui, Vec2, Widget};
 use std::path::PathBuf;
+use std::sync::Arc;
 use eframe::epaint::Margin;
 use egui::load::SizedTexture;
 use egui_i18n::tr;
@@ -15,18 +16,23 @@ use crate::documents::loader::DocumentContent;
 pub struct ImageDocument {
     pub path: PathBuf,
 
-    loader: DocumentContent<Image<'static>>,
+    loader: DocumentContent<egui::TextureHandle>,
 }
 
 impl ImageDocument {
-    pub fn create_new(path: PathBuf) -> Self {
+    pub fn create_new(path: PathBuf, ui: &mut egui::Ui) -> Self {
 
-        let texture = SizedTexture::new(TextureId::User(1), Vec2 { x: 100.0, y: 100.0 });
-        let image = Image::from_texture(texture);
+        let image_data: ImageData = ImageData::Color(Arc::new(ColorImage::new([100, 100], Color32::RED)));
+        
+        let texture_handle = ui.ctx().load_texture(
+            "my-image",
+            image_data,
+            Default::default()
+        );
 
         Self {
             path,
-            loader: DocumentContent::new(image),
+            loader: DocumentContent::new(texture_handle),
         }
     }
 
@@ -37,7 +43,7 @@ impl ImageDocument {
             let uri = url.to_string();
             info!("uri: {}", uri);
 
-            Image::from_uri(uri)
+            todo!()
         });
 
         Self {
@@ -123,11 +129,15 @@ impl ImageDocument {
     }
 
     fn content_ui(&mut self, ui: &mut Ui) {
-        if let Some(content) = self.loader.content_mut() {
+        if let Some(texture) = self.loader.content_mut() {
             egui::Frame::new().show(ui, |ui|{
-                // FIXME it's probably bad to clone the image...
-                let image = content.clone();
+
+                let image_source = (texture.id(), texture.size_vec2());
+                
+                let image = Image::new(image_source);
+                
                 ui.add_sized(ui.available_size(), image);
+                
             });
         } else {
             ui.spinner();

@@ -1,13 +1,13 @@
 use crate::app::tabs::{Tab, TabKey};
 use egui::{Checkbox, FontFamily, RichText, Ui, WidgetText};
 //use egui_flex::{item, Flex, FlexAlign, FlexDirection, FlexItem, FlexJustify};
+use crate::context::Context;
 use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
-use egui_taffy::taffy::{Style};
-use egui_taffy::{taffy, tui, TuiBuilderLogic};
 use egui_taffy::taffy::prelude::{length, percent};
+use egui_taffy::taffy::Style;
+use egui_taffy::{taffy, tui, TuiBuilderLogic};
 use serde::{Deserialize, Serialize};
-use crate::context::Context;
 
 #[derive(Clone, Default, Debug, Deserialize, Serialize)]
 pub struct HomeTab {
@@ -20,7 +20,6 @@ impl<'a> Tab<Context<'a>> for HomeTab {
     }
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context<'a>) {
-
         ui.ctx().style_mut(|style| {
             // if this is not done, text in labels/checkboxes/etc wraps
             style.wrap_mode = Some(egui::TextWrapMode::Extend);
@@ -44,24 +43,30 @@ impl<'a> Tab<Context<'a>> for HomeTab {
                 },
                 ..default_style()
             })
-            .show(|tui|{
-                tui
-                    .style(Style {
-                        flex_direction: taffy::FlexDirection::Row,
-                        //align_self: Some(taffy::AlignItems::Center),
-                        ..default_style()
-                    })
-                    .add_with_border(|tui|{
-                        tui.label(RichText::new(ICON_HOME)
+            .show(|tui| {
+                tui.style(Style {
+                    flex_direction: taffy::FlexDirection::Row,
+                    //align_self: Some(taffy::AlignItems::Center),
+                    ..default_style()
+                })
+                .add_with_border(|tui| {
+                    tui.label(
+                        RichText::new(ICON_HOME)
                             .size(48.0)
-                            .family(FontFamily::Proportional));
-                        tui.label(RichText::new(tr!("home-heading"))
+                            .family(FontFamily::Proportional),
+                    );
+                    tui.label(
+                        RichText::new(tr!("home-heading"))
                             .size(48.0)
-                            .family(FontFamily::Proportional));
-                    });
+                            .family(FontFamily::Proportional),
+                    );
+                });
 
-                tui.ui(|ui|{
-                    ui.add(Checkbox::new(&mut context.config.show_home_tab_on_startup, tr!("home-tab-show-on-startup")));
+                tui.ui(|ui| {
+                    ui.add(Checkbox::new(
+                        &mut context.config.show_home_tab_on_startup,
+                        tr!("home-tab-show-on-startup"),
+                    ));
                 });
             });
     }

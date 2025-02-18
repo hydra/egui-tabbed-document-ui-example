@@ -1,12 +1,12 @@
-use std::collections::btree_map::{Iter, IterMut};
 use crate::app::app_tabs::TabKind;
+use crate::app::AppMessage;
+use crate::context::Context;
 use egui::{Id, Ui, WidgetText};
 use egui_dock::TabViewer;
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
+use std::collections::btree_map::{Iter, IterMut};
 use std::collections::BTreeMap;
-use crate::app::AppMessage;
-use crate::context::Context;
 
 #[derive(Debug, Clone, Hash, Copy, Ord, Eq, PartialOrd, PartialEq, Serialize, Deserialize)]
 pub struct TabKey(usize);
@@ -61,7 +61,7 @@ impl Tabs {
     pub fn retain_all(&mut self, tab_keys: &[TabKey]) {
         self.tabs.retain(|tab_key, _| {
             let retain = tab_keys.contains(tab_key);
-            
+
             if !retain {
                 info!("Removing orphaned tab. key: {:?}", tab_key);
             }
@@ -80,7 +80,9 @@ pub trait Tab<App> {
     fn label(&self) -> WidgetText;
     fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, app: &mut App);
 
-    fn on_close(&mut self, tab_key: &mut TabKey, app: &mut App) -> bool { true }
+    fn on_close(&mut self, tab_key: &mut TabKey, app: &mut App) -> bool {
+        true
+    }
 }
 
 pub struct AppTabViewer<'a> {

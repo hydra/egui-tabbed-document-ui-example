@@ -2,9 +2,9 @@ use crate::app::app_tabs::document::DocumentTab;
 use crate::app::app_tabs::home::HomeTab;
 use crate::app::app_tabs::new::NewTab;
 use crate::app::tabs::{Tab, TabKey};
+use crate::context::Context;
 use egui::{Ui, WidgetText};
 use serde::{Deserialize, Serialize};
-use crate::context::Context;
 
 pub mod document;
 pub mod home;

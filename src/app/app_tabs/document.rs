@@ -1,10 +1,10 @@
-use std::path::PathBuf;
 use crate::app::tabs::{Tab, TabKey};
+use crate::context::Context;
+use crate::documents::{DocumentContext, DocumentKey, DocumentKind};
 use egui::{Ui, WidgetText};
 use log::debug;
 use serde::{Deserialize, Serialize};
-use crate::context::Context;
-use crate::documents::{DocumentContext, DocumentKey, DocumentKind};
+use std::path::PathBuf;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DocumentTab {
@@ -19,8 +19,11 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
     }
 
     fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context<'a>) {
-        ui.label(format!("path: {:?}, key: {:?}", self.path, self.document_key));
-        
+        ui.label(format!(
+            "path: {:?}, key: {:?}",
+            self.path, self.document_key
+        ));
+
         // get the document, this will fail if the document has not been restored on application startup.
         let mut documents_guard = context.documents.lock().unwrap();
         let document_kind = documents_guard.get_mut(self.document_key).unwrap();
@@ -34,7 +37,7 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
         };
 
         // Note: we specifically do NOT pass a `TabKey` to the document as the document should NOT know that it lives in a tab.
-        
+
         match document_kind {
             DocumentKind::TextDocument(document) => document.ui(ui, &mut document_context),
             DocumentKind::ImageDocument(document) => document.ui(ui, &mut document_context),

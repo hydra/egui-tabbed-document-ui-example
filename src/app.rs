@@ -1,22 +1,22 @@
-use std::mem::MaybeUninit;
+use crate::app::app_tabs::document::DocumentTab;
 use crate::app::app_tabs::home::HomeTab;
 use crate::app::app_tabs::new::{KindChoice, NewTab};
 use crate::app::app_tabs::TabKind;
 use crate::app::tabs::{AppTabViewer, TabKey, Tabs};
+use crate::context::Context;
+use crate::documents::image::ImageDocument;
+use crate::documents::text::TextDocument;
+use crate::documents::{DocumentKey, DocumentKind};
 use crate::file_picker::Picker;
 use crate::fonts;
 use egui_dock::{DockArea, DockState, Style};
 use egui_i18n::tr;
+use egui_inbox::{UiInbox, UiInboxSender};
 use log::{debug, info};
+use slotmap::SlotMap;
+use std::mem::MaybeUninit;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use egui_inbox::{UiInbox, UiInboxSender};
-use slotmap::SlotMap;
-use crate::app::app_tabs::document::DocumentTab;
-use crate::context::Context;
-use crate::documents::{DocumentKey, DocumentKind};
-use crate::documents::image::ImageDocument;
-use crate::documents::text::TextDocument;
 
 pub type AppMessageSender = UiInboxSender<(MessageSource, AppMessage)>;
 
@@ -50,13 +50,13 @@ struct AppState {
 #[derive(Debug)]
 pub enum AppMessage {
     Refresh,
-    CreateDocument(DocumentArgs)
+    CreateDocument(DocumentArgs),
 }
 
 #[derive(Debug)]
 pub enum MessageSource {
     Document(DocumentKey),
-    Tab(TabKey)
+    Tab(TabKey),
 }
 
 #[derive(Debug)]
@@ -187,11 +187,11 @@ impl TemplateApp {
         let extension = path.extension().unwrap().to_string_lossy().to_string();
 
         let sender = self.state().sender.clone();
-        
-        let document_key= self.state().documents.lock().unwrap().insert_with_key({
+
+        let document_key = self.state().documents.lock().unwrap().insert_with_key({
             let sender = sender.clone();
-            
-            |new_key|{
+
+            |new_key| {
                 if extension.eq("txt") {
                     let text_document = TextDocument::from_path(path.clone(), new_key, sender);
                     let document = DocumentKind::TextDocument(text_document);
@@ -219,7 +219,11 @@ impl TemplateApp {
     }
 
     fn create_document_tab_inner(&mut self, args: DocumentArgs) -> TabKind {
-        let DocumentArgs { mut name, directory: mut path, kind } = args;
+        let DocumentArgs {
+            mut name,
+            directory: mut path,
+            kind,
+        } = args;
 
         match kind {
             KindChoice::Text => {
@@ -231,10 +235,10 @@ impl TemplateApp {
                 let text_document = TextDocument::create_new(path.clone());
                 let document = DocumentKind::TextDocument(text_document);
 
-                let document_key= self.state().documents.lock().unwrap().insert(document);
+                let document_key = self.state().documents.lock().unwrap().insert(document);
                 TabKind::Document(DocumentTab::new(title, path, document_key))
             }
-            KindChoice::Image => todo!()
+            KindChoice::Image => todo!(),
         }
     }
 
@@ -264,10 +268,12 @@ impl TemplateApp {
     /// and the dock tree are out of sync.  `on_close` should be removing elements from `self.tabs` corresponding to the
     /// tab being closed, but because it is not called there can be orphaned elements, we need to find and remove them.
     pub fn cleanup_tabs(&mut self) {
-        let known_tab_keys = self.tree.iter_all_tabs().map(|(_surface_and_node, tab_key)| {
-            tab_key.clone()
-        }).collect::<Vec<_>>();
-        
+        let known_tab_keys = self
+            .tree
+            .iter_all_tabs()
+            .map(|(_surface_and_node, tab_key)| tab_key.clone())
+            .collect::<Vec<_>>();
+
         self.tabs.retain_all(&known_tab_keys);
     }
 
@@ -279,25 +285,26 @@ impl TemplateApp {
     /// Safety: call only once on startup, before the tabs are shown.
     fn restore_documents_on_startup(&mut self) {
         // we have to do this as a two-step process to above borrow-checker issues
-        
+
         // step 1 - find the document tabs, return the tab keys and paths.
-        let tab_keys_and_paths = self.tabs.iter_mut().filter_map(|(tab_key, tab_kind)| {
-            match tab_kind {
+        let tab_keys_and_paths = self
+            .tabs
+            .iter_mut()
+            .filter_map(|(tab_key, tab_kind)| match tab_kind {
                 TabKind::Document(document_tab) => {
                     Some((tab_key.clone(), document_tab.path.clone()))
                 }
-                _ => None
-            }
-        }).collect::<Vec<_>>();
+                _ => None,
+            })
+            .collect::<Vec<_>>();
 
         // step 2 - store the documents and update the document key for the tab.
         for (tab_key, path) in tab_keys_and_paths {
             let sender = self.state().sender.clone();
-            
+
             let new_key = self.state().documents.lock().unwrap().insert_with_key({
                 let sender = sender.clone();
-                |new_key|{
-
+                |new_key| {
                     let extension = path.extension().unwrap().to_str().unwrap();
 
                     const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
@@ -372,7 +379,7 @@ impl eframe::App for TemplateApp {
                     if close_all_button.clicked() {
                         // FIXME there's a bug in `egui_dock` where the `on_close` handler is not called
                         //       when programmatically closing all the tabs - reported via discord: https://discord.com/channels/900275882684477440/1075333382290026567/1340993744941617233
-                        self.tree.retain_tabs(|_tab_key|false);
+                        self.tree.retain_tabs(|_tab_key| false);
                     }
                 });
             });
@@ -385,7 +392,7 @@ impl eframe::App for TemplateApp {
             self.restore_documents_on_startup();
         }
 
-        // FIXME remove this when `on_close` bugs in egui_dock are fixed. 
+        // FIXME remove this when `on_close` bugs in egui_dock are fixed.
         self.cleanup_tabs();
 
         // TODO discover whether cloning a sender is expensive or not
@@ -408,13 +415,13 @@ impl eframe::App for TemplateApp {
             .show(ctx, &mut my_tab_viewer);
 
         if let Ok(picked_file) = self.state().file_picker.picked() {
-
             // FIXME this `update` method does not get called immediately after picking a file, instead update gets
             //       called when the user moves the mouse or interacts with the window again.
             self.open_file(picked_file);
         }
 
-        let mut messages: Vec<(MessageSource, AppMessage)> = self.state().receiver.read(ctx).collect();
+        let mut messages: Vec<(MessageSource, AppMessage)> =
+            self.state().receiver.read(ctx).collect();
 
         for (source, message) in messages.drain(..) {
             match (source, message) {
@@ -429,7 +436,7 @@ impl eframe::App for TemplateApp {
                         // message is sent from a tab that does not exist.
                         unreachable!()
                     }
-                },
+                }
                 (source, AppMessage::Refresh) => {
                     // nothing to do, we're already refreshing at this point.
                     debug!("refresh message received. source: {:?}", source);

@@ -41,28 +41,25 @@ impl Picker {
             .name("picker".to_owned())
             .spawn(move || {
                 let mut guard = picker.lock().unwrap();
-                *guard = (
-                    true,
-                    some_fn()
-                );
+                *guard = (true, some_fn());
             })
             .unwrap();
     }
 
     pub fn pick_file(&mut self) {
-        self.prepare(||
-                    rfd::FileDialog::new()
-                        .pick_file()
-                        .map(std::path::PathBuf::from)
-        );
+        self.prepare(|| {
+            rfd::FileDialog::new()
+                .pick_file()
+                .map(std::path::PathBuf::from)
+        });
     }
 
     pub fn pick_folder(&mut self) {
-        self.prepare(||
-             rfd::FileDialog::new()
-                 .pick_folder()
-                 .map(std::path::PathBuf::from),
-        );
+        self.prepare(|| {
+            rfd::FileDialog::new()
+                .pick_folder()
+                .map(std::path::PathBuf::from)
+        });
     }
 
     /// when picked, returns the picked path, or an error indicating the reason

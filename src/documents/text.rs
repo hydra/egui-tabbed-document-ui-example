@@ -50,7 +50,7 @@ impl TextDocumentContent {
                 // add a 2-second delay to simulate slow loading.
                 // this is done to that thread notification can be observed in the UI; a solution is required
                 // to have the UI update when loading is complete.
-                thread::sleep(Duration::from_secs(2));
+                thread::sleep(Duration::from_secs(1));
 
                 let content = std::fs::read_to_string(path).unwrap();
 

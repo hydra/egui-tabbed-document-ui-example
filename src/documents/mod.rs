@@ -4,6 +4,8 @@ use crate::documents::text::TextDocument;
 use egui_inbox::UiInboxSender;
 use slotmap::new_key_type;
 
+pub mod loader;
+
 pub mod image;
 pub mod text;
 
@@ -21,3 +23,4 @@ pub struct DocumentContext<'a> {
     pub config: &'a mut Config,
     pub sender: UiInboxSender<(MessageSource, AppMessage)>,
 }
+

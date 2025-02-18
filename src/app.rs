@@ -18,6 +18,10 @@ use std::mem::MaybeUninit;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 
+const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
+const SUPPORTED_IMAGE_EXTENSIONS: [&'static str; 1] = ["bmp"];
+
+
 pub type AppMessageSender = UiInboxSender<(MessageSource, AppMessage)>;
 
 mod app_tabs;
@@ -184,22 +188,13 @@ impl TemplateApp {
 
         let title = path.file_name().unwrap().to_string_lossy().to_string();
 
-        let extension = path.extension().unwrap().to_string_lossy().to_string();
-
         let sender = self.state().sender.clone();
 
         let document_key = self.state().documents.lock().unwrap().insert_with_key({
             let sender = sender.clone();
 
             |new_key| {
-                if extension.eq("txt") {
-                    let text_document = TextDocument::from_path(path.clone(), new_key, sender);
-                    let document = DocumentKind::TextDocument(text_document);
-
-                    document
-                } else {
-                    todo!()
-                }
+                Self::document_from_path(&path, sender, new_key)
             }
         });
         let tab_kind = TabKind::Document(DocumentTab::new(title, path, document_key));
@@ -233,12 +228,24 @@ impl TemplateApp {
                 let title = path.file_name().unwrap().to_string_lossy().to_string();
 
                 let text_document = TextDocument::create_new(path.clone());
-                let document = DocumentKind::TextDocument(text_document);
+                let document_kind = DocumentKind::TextDocument(text_document);
 
-                let document_key = self.state().documents.lock().unwrap().insert(document);
+                let document_key = self.state().documents.lock().unwrap().insert(document_kind);
                 TabKind::Document(DocumentTab::new(title, path, document_key))
             }
-            KindChoice::Image => todo!(),
+            KindChoice::Image => {
+                name.push_str(".bmp");
+                path.push(&name);
+
+                let title = path.file_name().unwrap().to_string_lossy().to_string();
+
+                let image_document = ImageDocument::create_new(path.clone());
+                let document_kind = DocumentKind::ImageDocument(image_document);
+
+                let document_key = self.state().documents.lock().unwrap().insert(document_kind);
+                TabKind::Document(DocumentTab::new(title, path, document_key))
+                
+            },
         }
     }
 
@@ -305,18 +312,7 @@ impl TemplateApp {
             let new_key = self.state().documents.lock().unwrap().insert_with_key({
                 let sender = sender.clone();
                 |new_key| {
-                    let extension = path.extension().unwrap().to_str().unwrap();
-
-                    const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
-
-                    if SUPPORTED_TEXT_EXTENSIONS.contains(&extension) {
-                        let text_document = TextDocument::from_path(path.clone(), new_key, sender);
-                        let document = DocumentKind::TextDocument(text_document);
-
-                        document
-                    } else {
-                        todo!()
-                    }
+                    Self::document_from_path(&path, sender, new_key)
                 }
             });
             if let TabKind::Document(ref mut document_tab) = self.tabs.get_mut(&tab_key).unwrap() {
@@ -324,6 +320,20 @@ impl TemplateApp {
             } else {
                 unreachable!()
             }
+        }
+    }
+
+    fn document_from_path(path: &PathBuf, sender: UiInboxSender<(MessageSource, AppMessage)>, new_key: DocumentKey) -> DocumentKind {
+        let extension = path.extension().unwrap().to_str().unwrap();
+
+        if SUPPORTED_TEXT_EXTENSIONS.contains(&extension) {
+            let text_document = TextDocument::from_path(path.clone(), new_key, sender);
+            DocumentKind::TextDocument(text_document)
+        } else if SUPPORTED_IMAGE_EXTENSIONS.contains(&extension) {
+            let image_document = ImageDocument::from_path(path.clone(), new_key, sender);
+            DocumentKind::ImageDocument(image_document)
+        } else {
+            todo!()
         }
     }
 }

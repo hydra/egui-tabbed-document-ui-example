@@ -59,17 +59,17 @@
         - [x] Length of document.
         - [ ] Selection information. ❌ egui `TextEdit` API doesn't support this.
     - 'Image' tab, displays an 'image' document.
-      - [ ] Filename must appear in tab.
-      - [ ] Shows the image.
+      - [x] Filename must appear in tab.
+      - [x] Shows the image.
       - [ ] Image is top-left justified.
       - [ ] Image is scaled-up to fit window, aspect ratio must be preserved.
       - [ ] Do not allow image to be scaled down.
       - [ ] If too big to fit in the window, scrollbars must be present to allow panning
-      - [ ] Content must be loaded in a thread or async, in the background.
+      - [x] Content must be loaded in a thread or async, in the background.
       - Tab State
         - [ ] Maintain X/Y coordinates of last click of anywhere on the image.
       - Info sidebar with a grid of key/value items
-        - [ ] File path.
+        - [x] File path.
         - [ ] Last-clicked X/Y coordinate information.
         - [ ] Image size. (width, height).
 - Application state must be loaded on program start, and saved as appropriate.

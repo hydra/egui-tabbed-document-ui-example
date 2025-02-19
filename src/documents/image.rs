@@ -1,15 +1,17 @@
 use crate::documents::{DocumentContext, DocumentKey};
-use egui::{epaint, frame, Color32, ColorImage, Context, Image, ImageData, ImageSource, SizeHint, TextureHandle, TextureId, TextureOptions, Ui, Vec2, Widget};
+use egui::{frame, Color32, ColorImage, Context, Image, ImageData, ImageSource, SizeHint, TextureHandle, TextureOptions, Ui};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use eframe::epaint::Margin;
-use egui::load::SizedTexture;
+use egui::load::{SizedTexture, TexturePoll};
 use egui_i18n::tr;
 use egui_taffy::taffy::prelude::{auto, fit_content, fr, length, percent};
 use egui_taffy::taffy::{AlignItems, Display, FlexDirection, Size, Style};
 use egui_taffy::{tui, TuiBuilderLogic};
+use image::ImageReader;
+use image::GenericImageView;
 use log::{debug, error, info};
 use url::Url;
 use crate::app::{AppMessage, AppMessageSender, MessageSource};
@@ -45,11 +47,7 @@ impl ImageDocument {
     pub fn from_path(path: PathBuf, ctx: &Context, document_key: DocumentKey, sender: AppMessageSender) -> Self {
         let message = (MessageSource::Document(document_key), AppMessage::Refresh);
         let loader = DocumentContent::load(path.clone(), ctx, message, sender, move |path, ctx| {
-            fn load_image_from_uri(ctx: &Context, path: &Path) -> Option<TextureHandle> {
-                use eframe::egui::{self, Context, Image, TextureHandle, TextureOptions, Ui};
-                use image::io::Reader as ImageReader;
-                use image::GenericImageView;
-
+            fn load_image_from_file_using_image_crate(ctx: &Context, path: &Path) -> Option<TextureHandle> {
                 // Open and decode the image
                 let img = ImageReader::open(path).ok()?.decode().ok()?;
                 let size = img.dimensions();
@@ -64,8 +62,31 @@ impl ImageDocument {
                 // Load the texture into egui
                 Some(ctx.load_texture("loaded_image", color_image, TextureOptions::default()))
             }
+            fn load_image_from_file_using_egui_extras(ctx: &Context, path: &Path) -> Option<TextureHandle> {
+                // Attempt to load the image
+                let url = Url::from_file_path(path).unwrap();
+                info!("uri: {}", url);
+            
+            
+                let texture = loop {
+                    let poll = ctx.try_load_texture(url.as_str(), TextureOptions::default(), SizeHint::default()).ok()?;
+                    match poll {
+                        TexturePoll::Pending { .. } => {
+                            debug!("texture poll pending");
+                            thread::sleep(Duration::from_millis(100));
+                        }
+                        TexturePoll::Ready { texture } => {
+                            debug!("texture poll ready");
+                            break texture;
+                        }
+                    }
+                };
+                
+                Some(TextureHandle::new(ctx.tex_manager(), texture.id))
+            }
 
-            let result = load_image_from_uri(ctx, path.as_path());
+            //let result = load_image_from_file_using_image_crate(ctx, path.as_path());
+            let result = load_image_from_file_using_egui_extras(ctx, path.as_path());
             match result {
                 None => {
                     error!("Failed to load image");

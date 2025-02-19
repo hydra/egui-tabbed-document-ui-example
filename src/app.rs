@@ -17,7 +17,7 @@ use slotmap::SlotMap;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-//use egui_extras::install_image_loaders;
+use egui_extras::install_image_loaders;
 
 const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
 const SUPPORTED_IMAGE_EXTENSIONS: [&'static str; 4] = ["bmp", "png", "jpeg", "jpg"];
@@ -128,7 +128,7 @@ impl TemplateApp {
         // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
         fonts::initialize(&cc.egui_ctx);
 
-        //install_image_loaders(&cc.egui_ctx);
+        install_image_loaders(&cc.egui_ctx);
 
         // Load previous app state (if any).
         // Note that you must enable the `persistence` feature for this to work.

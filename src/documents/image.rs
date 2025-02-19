@@ -31,7 +31,7 @@ impl ImageDocument {
         let image_data: ImageData = ImageData::Color(Arc::new(ColorImage::new([100, 100], Color32::RED)));
 
         let texture_handle = ctx.load_texture(
-            "my-image",
+            path.to_str().unwrap(),
             image_data,
             Default::default()
         );

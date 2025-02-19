@@ -10,7 +10,7 @@ pub mod fluent_argument_helpers {
     use egui::TextBuffer;
     use fluent_bundle::types::{FluentNumber, FluentNumberOptions};
     use fluent_bundle::{FluentArgs, FluentValue};
-    use log::warn;
+    use log::trace;
     use serde_json::Value;
     use std::borrow::Cow;
     use std::collections::HashMap;
@@ -20,7 +20,7 @@ pub mod fluent_argument_helpers {
         for (key, value) in params.iter() {
             match value {
                 Value::Null => {
-                    warn!("encountered null value for field: {}", key);
+                    trace!("encountered null value for field: {}", key);
                 }
                 Value::Bool(_) => todo!(),
                 Value::Number(number) => {

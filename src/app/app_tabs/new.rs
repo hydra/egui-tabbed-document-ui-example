@@ -6,6 +6,7 @@ use egui_taffy::taffy::{AlignContent, AlignItems, AlignSelf, Display, FlexDirect
 use egui_taffy::{taffy, tui, Tui, TuiBuilderLogic, TuiContainerResponse};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use log::trace;
 use validator::{Validate, ValidationErrors};
 // FIXME dependency on AppMessage and AppMessageSender here seems wrong.
 //       Feels like App should depend on new tab, new tab should not depend on App.
@@ -308,7 +309,7 @@ impl NewTab {
 
                         let message = translate_fluent(code, &args);
 
-                        println!("field_error: {}", field_error);
+                        trace!("field_error: {}", field_error);
 
                         tui.label(RichText::new(message).color(colors::ERROR));
                     }

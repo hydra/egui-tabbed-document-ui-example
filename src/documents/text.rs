@@ -11,9 +11,12 @@ use crate::documents::loader::DocumentContent;
 pub struct TextDocument {
     pub path: PathBuf,
 
-    loader: DocumentContent<String>,
+    loader: DocumentContent<String, TextLoaderError>,
 }
 
+enum TextLoaderError {
+    Error
+}
 
 impl TextDocument {
     pub fn create_new(path: PathBuf) -> Self {
@@ -26,7 +29,10 @@ impl TextDocument {
     pub fn from_path(path: PathBuf, ctx: &egui::Context, document_key: DocumentKey, sender: AppMessageSender) -> Self {
         let message = (MessageSource::Document(document_key), AppMessage::Refresh);
         let loader = DocumentContent::load(path.clone(), ctx, message, sender, |path, ctx| {
-            std::fs::read_to_string(path).unwrap()
+            match std::fs::read_to_string(path) {
+                Ok(content) => Ok(content),
+                Err(_cause) => Err(TextLoaderError::Error),
+            }
         });
 
         Self { path, loader }

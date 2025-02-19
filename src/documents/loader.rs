@@ -5,17 +5,18 @@ use std::time::Duration;
 use log::info;
 use crate::app::{AppMessage, AppMessageSender, MessageSource};
 
-enum LoaderState<T: Send + 'static> {
-    Loading(Option<JoinHandle<T>>),
+enum LoaderState<T: Send + 'static, E: Send + 'static> {
+    Loading(Option<JoinHandle<Result<T, E>>>),
     Loaded(T),
+    Error(E),
 }
 
 
-pub struct DocumentContent<T: Send + 'static> {
-    state: LoaderState<T>,
+pub struct DocumentContent<T: Send + 'static, E: Send + 'static> {
+    state: LoaderState<T, E>,
 }
 
-impl<T: Send + 'static> DocumentContent<T> {
+impl<T: Send + 'static, E: Send + 'static> DocumentContent<T, E> {
     pub fn content(&self) -> Option<&T> {
         match &self.state {
             LoaderState::Loaded(content) => Some(content),
@@ -41,7 +42,7 @@ impl<T: Send + 'static> DocumentContent<T> {
         ctx: &egui::Context,
         on_loaded_message: (MessageSource, AppMessage),
         sender: AppMessageSender,
-        load_fn: fn(path_buf: PathBuf, ctx: &egui::Context) -> T,
+        load_fn: fn(path_buf: PathBuf, ctx: &egui::Context) -> Result<T, E>,
     ) -> Self {
         let ctx = ctx.clone();
         let handle = thread::Builder::new()
@@ -54,7 +55,7 @@ impl<T: Send + 'static> DocumentContent<T> {
                 // to have the UI update when loading is complete.
                 thread::sleep(Duration::from_secs(1));
 
-                let content: T = load_fn(path, &ctx);
+                let content: Result<T, E> = load_fn(path, &ctx);
 
                 // send a message via the sender to cause the UI to be updated when loading is complete.
                 sender.send(on_loaded_message).expect("sent");
@@ -74,8 +75,10 @@ impl<T: Send + 'static> DocumentContent<T> {
                 if handle.as_ref().unwrap().is_finished() {
                     let handle = handle.take().unwrap();
 
-                    let result = handle.join().unwrap();
-                    self.state = LoaderState::Loaded(result);
+                    match handle.join().unwrap() {
+                        Ok(content) => self.state = LoaderState::Loaded(content),
+                        Err(error) => self.state = LoaderState::Error(error),
+                    }
                 }
             }
             _ => {}

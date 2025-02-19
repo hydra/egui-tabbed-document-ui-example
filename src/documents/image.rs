@@ -18,7 +18,11 @@ use crate::documents::loader::DocumentContent;
 pub struct ImageDocument {
     pub path: PathBuf,
 
-    loader: DocumentContent<TextureHandle>,
+    loader: DocumentContent<TextureHandle, ImageLoaderError>,
+}
+
+enum ImageLoaderError {
+    Error
 }
 
 impl ImageDocument {
@@ -64,11 +68,12 @@ impl ImageDocument {
             let result = load_image_from_uri(ctx, path.as_path());
             match result {
                 None => {
-                    panic!("Failed to load image");
+                    error!("Failed to load image");
+                    Err(ImageLoaderError::Error)
                 }
                 Some(result) => {
                     info!("Image loaded. texture_id: {:?}", result.id());
-                    result
+                    Ok(result)
                 }
             }
 

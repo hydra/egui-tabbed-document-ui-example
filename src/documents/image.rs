@@ -41,7 +41,6 @@ impl ImageDocument {
     pub fn from_path(path: PathBuf, ctx: &Context, document_key: DocumentKey, sender: AppMessageSender) -> Self {
         let message = (MessageSource::Document(document_key), AppMessage::Refresh);
         let loader = DocumentContent::load(path.clone(), ctx, message, sender, move |path, ctx| {
-            /// Load an image from a file:// URI and convert it to an egui::ColorImage
             fn load_image_from_uri(ctx: &Context, path: &Path) -> Option<TextureHandle> {
                 use eframe::egui::{self, Context, Image, TextureHandle, TextureOptions, Ui};
                 use image::io::Reader as ImageReader;

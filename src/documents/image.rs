@@ -97,27 +97,6 @@ impl ImageDocument {
                     Ok(result)
                 }
             }
-
-            /*
-            let url = Url::from_file_path(path).unwrap();
-            let uri = url.to_string();
-            info!("uri: {}", uri);
-            
-            let result = ctx.try_load_texture(url.as_str(), TextureOptions::default(), SizeHint::default());
-            let actual_result = result.unwrap();
-            while actual_result.size().is_none() && actual_result.texture_id().is_none() {
-                // FIXME what will make the result non-null? do we have to timeout? apparently nothing, this just hangs the thread
-                debug!("waiting for image to load");
-                thread::sleep(Duration::from_millis(100));
-            }
-            let texture = SizedTexture::new(actual_result.texture_id().unwrap(), actual_result.size().unwrap());
-
-            let image_source = ImageSource::Texture(texture);
-            let result = (image_source, None);
-            info!("source: {:?}", result.0);
-
-            result
-             */
         });
 
         Self {

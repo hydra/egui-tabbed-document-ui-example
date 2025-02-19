@@ -28,7 +28,7 @@ impl TextDocument {
 
     pub fn from_path(path: PathBuf, ctx: &egui::Context, document_key: DocumentKey, sender: AppMessageSender) -> Self {
         let message = (MessageSource::Document(document_key), AppMessage::Refresh);
-        let loader = DocumentContent::load(path.clone(), ctx, message, sender, |path, ctx| {
+        let loader = DocumentContent::load(path.clone(), ctx, message, sender, |path, _ctx| {
             match std::fs::read_to_string(path) {
                 Ok(content) => Ok(content),
                 Err(_cause) => Err(TextLoaderError::Error),

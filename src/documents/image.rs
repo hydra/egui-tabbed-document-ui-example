@@ -26,11 +26,11 @@ enum ImageLoaderError {
 }
 
 impl ImageDocument {
-    pub fn create_new(path: PathBuf, ui: &mut egui::Ui) -> Self {
+    pub fn create_new(path: PathBuf, ctx: &Context) -> Self {
 
         let image_data: ImageData = ImageData::Color(Arc::new(ColorImage::new([100, 100], Color32::RED)));
 
-        let texture_handle = ui.ctx().load_texture(
+        let texture_handle = ctx.load_texture(
             "my-image",
             image_data,
             Default::default()

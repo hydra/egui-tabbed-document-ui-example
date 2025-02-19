@@ -17,7 +17,6 @@ use slotmap::SlotMap;
 use std::mem::MaybeUninit;
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
-use egui::Ui;
 //use egui_extras::install_image_loaders;
 
 const SUPPORTED_TEXT_EXTENSIONS: [&'static str; 1] = ["txt"];
@@ -206,8 +205,8 @@ impl TemplateApp {
         self.add_tab(tab_kind);
     }
 
-    fn create_document_tab(&mut self, ui: &mut Ui, args: DocumentArgs) {
-        let tab_kind = self.create_document_tab_inner(ui, args);
+    fn create_document_tab(&mut self, ctx: &mut egui::Context, args: DocumentArgs) {
+        let tab_kind = self.create_document_tab_inner(ctx, args);
 
         self.add_tab(tab_kind);
     }
@@ -217,7 +216,7 @@ impl TemplateApp {
         self.tree.push_to_focused_leaf(tab_id);
     }
 
-    fn create_document_tab_inner(&mut self, ui: &mut Ui, args: DocumentArgs) -> TabKind {
+    fn create_document_tab_inner(&mut self, ctx: &egui::Context, args: DocumentArgs) -> TabKind {
         let DocumentArgs {
             mut name,
             directory: mut path,
@@ -243,7 +242,7 @@ impl TemplateApp {
 
                 let title = path.file_name().unwrap().to_string_lossy().to_string();
 
-                let image_document = ImageDocument::create_new(path.clone(), ui);
+                let image_document = ImageDocument::create_new(path.clone(), ctx);
                 let document_kind = DocumentKind::ImageDocument(image_document);
 
                 let document_key = self.state().documents.lock().unwrap().insert(document_kind);
@@ -353,36 +352,36 @@ impl eframe::App for TemplateApp {
         // Put your widgets into a `SidePanel`, `TopBottomPanel`, `CentralPanel`, `Window` or `Area`.
         // For inspiration and more examples, go to https://emilk.github.io/egui
 
-        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
-            
-            let mut messages: Vec<(MessageSource, AppMessage)> =
-                self.state().receiver.read(ctx).collect();
 
-            for (source, message) in messages.drain(..) {
-                match (source, message) {
-                    (MessageSource::Tab(tab_key), AppMessage::CreateDocument(args)) => {
-                        // replace tabs here...
+        let mut messages: Vec<(MessageSource, AppMessage)> =
+            self.state().receiver.read(ctx).collect();
 
-                        let document_tab_kind = self.create_document_tab_inner(ui, args);
+        for (source, message) in messages.drain(..) {
+            match (source, message) {
+                (MessageSource::Tab(tab_key), AppMessage::CreateDocument(args)) => {
+                    // replace tabs here...
 
-                        if let Some(tab_kind) = self.tabs.get_mut(&tab_key) {
-                            *tab_kind = document_tab_kind;
-                        } else {
-                            // message is sent from a tab that does not exist.
-                            unreachable!()
-                        }
-                    }
-                    (source, AppMessage::Refresh) => {
-                        // nothing to do, we're already refreshing at this point.
-                        debug!("refresh message received. source: {:?}", source);
-                    }
-                    (_, _) => {
-                        // unprocessed message
+                    let document_tab_kind = self.create_document_tab_inner(ctx, args);
+
+                    if let Some(tab_kind) = self.tabs.get_mut(&tab_key) {
+                        *tab_kind = document_tab_kind;
+                    } else {
+                        // message is sent from a tab that does not exist.
                         unreachable!()
                     }
                 }
+                (source, AppMessage::Refresh) => {
+                    // nothing to do, we're already refreshing at this point.
+                    debug!("refresh message received. source: {:?}", source);
+                }
+                (_, _) => {
+                    // unprocessed message
+                    unreachable!()
+                }
             }
-
+        }
+        
+        egui::TopBottomPanel::top("top_panel").show(ctx, |ui| {
             // The top panel is often a good place for a menu bar:
 
             egui::menu::bar(ui, |ui| {

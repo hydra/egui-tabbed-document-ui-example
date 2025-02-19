@@ -184,18 +184,20 @@ impl ImageDocument {
     }
 
     fn content_ui(&mut self, ui: &mut Ui) {
-        if let Some(texture_handle) = self.loader.content_mut() {
-            debug!("image loaded");;
-            egui::Frame::new().show(ui, |ui|{
-                let image_source = ImageSource::Texture(SizedTexture::from_handle(&texture_handle));
-                let image = Image::new(image_source);
-
-                ui.add_sized(ui.available_size(), image);
-            });
+        if self.loader.is_error() {
+            ui.label(tr!("file-loading-error"));
         } else {
-            debug!("image loading");;
-            //ui.spinner();
-            ui.label(tr!("file-loading"));
+            if let Some(texture_handle) = self.loader.content_mut() {
+                egui::Frame::new().show(ui, |ui| {
+                    let image_source = ImageSource::Texture(SizedTexture::from_handle(&texture_handle));
+                    let image = Image::new(image_source);
+
+                    ui.add_sized(ui.available_size(), image);
+                });
+            } else {
+                ui.spinner();
+                ui.label(tr!("file-loading"));
+            }
         }
     }
 }

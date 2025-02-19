@@ -4,6 +4,7 @@ toolbar-button-open = Open
 toolbar-button-close-all = Close all
 
 file-loading = Loading...
+file-loading-error = Error loading file
 
 menu-top-level-file = File
 menu-item-quit = Quit

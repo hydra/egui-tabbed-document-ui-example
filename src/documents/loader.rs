@@ -30,6 +30,17 @@ impl<T: Send + 'static, E: Send + 'static> DocumentContent<T, E> {
             _ => None,
         }
     }
+    
+    pub fn is_error(&self) -> bool {
+        matches!(self.state, LoaderState::Error(_))
+    }
+    
+    pub fn error(&self) -> Option<&E> {
+        match &self.state {
+            LoaderState::Error(error) => Some(error),
+            _ => None,
+        }
+    }
 
     pub fn new(content: T) -> Self {
         Self {

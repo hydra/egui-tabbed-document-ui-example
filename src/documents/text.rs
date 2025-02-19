@@ -136,11 +136,15 @@ impl TextDocument {
     }
 
     fn content_ui(&mut self, ui: &mut Ui) {
-        if let Some(content) = self.loader.content_mut() {
-            ui.add_sized(ui.available_size(), TextEdit::multiline(content));
+        if self.loader.is_error() {
+            ui.label(tr!("file-loading-error"));
         } else {
-            ui.spinner();
-            ui.label(tr!("file-loading"));
+            if let Some(content) = self.loader.content_mut() {
+                ui.add_sized(ui.available_size(), TextEdit::multiline(content));
+            } else {
+                ui.spinner();
+                ui.label(tr!("file-loading"));
+            }
         }
     }
 }

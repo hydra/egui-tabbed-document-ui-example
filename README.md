@@ -11,8 +11,8 @@
     - [x] if the home tab is already open, it should switch to it.
   - 'Open' button
     - [x] When clicked, shows a native file selector dialog which allows the user to choose a file.
-    - [ ] If an unsupported file is selected, show a native error dialog.
-    - [ ] When a file is opened, a tab appears and depending on the file type, it shows different content in the tab. (e.g. '.txt' text shows the 'Text' tab, '.bmp' shows the 'Image' tab).
+    - [ ] If an unsupported file is selected, show a native error dialog. ❌ could use RFD for this, currently errors are show in the document content area.
+    - [x] When a file is opened, a tab appears and depending on the file type, it shows different content in the tab. (e.g. '.txt' text shows the 'Text' tab, '.bmp' shows the 'Image' tab).
   - 'New' button
     - [x] When clicked the 'New' tab is shown, see below.
   - [ ] Language dropdown, choose between at least 2 languages (e.g. English and Spanish).
@@ -52,8 +52,8 @@
       - [x] Show text file content in an editor.
       - [x] Content must be loaded in a thread or async, in the background.
       - Tab State
-        - [ ] Maintain text selection. ❌ Text selection is lost when changing tabs.
-        - [ ] Maintain caret position. ❌ Caret position and focus is lost when changing tabs.
+        - [x] Maintain text selection. ❌ Currently focus is lost when changing tabs, but the selection is preserved.
+        - [x] Maintain caret position. ❌ Currently focus is lost when changing tabs, but the caret position is preserved.
       - Info sidebar with a grid of key/value items
         - [x] File path.
         - [x] Length of document.
@@ -83,9 +83,9 @@
   - 'text' - the text file.
   - 'image' - the image file.
 - Architecture
-  - [ ] Code should be written in such a way that multiple-developers can work on different aspects of the codebase without creating merge-conflicts. i.e. use modules, avoid tight-coupling, good compile-time dependencies, etc.
+  - [ ] Code should be written in such a way that multiple-developers can work on different aspects of the codebase without creating merge-conflicts. i.e. use modules, avoid tight-coupling, good compile-time dependencies, etc. ❌ much care is required to structure the application to avoid mixing presentation code and logic code together. 
   - [x] The application itself must own the documents (images, text), not the tabs themselves.
-  - [ ] When the last tab for a document is closed, the document should be dropped/closed.
+  - [x] When the last tab for a document is closed, the document should be dropped/closed.
 - Bonus points
   - [ ] Native look and feel controls. ❌ egui has a non-native style.
   - [x] Some way of closing all the tabs in one go (e.g. "Close all" button on toolbar). 

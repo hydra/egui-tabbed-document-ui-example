@@ -184,7 +184,7 @@ impl ImageDocument {
             debug!("image loaded");;
             egui::Frame::new().show(ui, |ui|{
                 let image_source = ImageSource::Texture(SizedTexture::from_handle(&texture_handle));
-                let image = Image::new(image_source.clone());
+                let image = Image::new(image_source);
 
                 ui.add_sized(ui.available_size(), image);
             });

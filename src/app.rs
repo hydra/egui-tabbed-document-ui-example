@@ -283,7 +283,10 @@ impl TemplateApp {
             .iter_all_tabs()
             .map(|(_surface_and_node, tab_key)| tab_key.clone())
             .collect::<Vec<_>>();
-
+        
+        // FIXME this doesn't close the documents corresponding to orphaned tabs.
+        //       we need to call `on_close` for each closed tab manually.
+        
         self.tabs.retain_all(&known_tab_keys);
     }
 

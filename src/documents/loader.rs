@@ -9,6 +9,22 @@ enum LoaderState<T: Send + 'static, E: Send + 'static> {
     Loading(Option<JoinHandle<Result<T, E>>>),
     Loaded(T),
     Error(E),
+    Taken(),
+}
+
+impl<T: Send + 'static, E: Send + 'static> LoaderState<T, E> {
+    pub fn take(&mut self) -> Option<T> {
+        match &self {
+            LoaderState::Loaded(_) => {
+                let previous = std::mem::replace(self, LoaderState::Taken());
+                match previous {
+                    LoaderState::Loaded(value) => Some(value),
+                    _ => unreachable!(),
+                }
+            }
+            _ => None
+        }
+    }
 }
 
 
@@ -17,6 +33,12 @@ pub struct DocumentContent<T: Send + 'static, E: Send + 'static> {
 }
 
 impl<T: Send + 'static, E: Send + 'static> DocumentContent<T, E> {
+    
+    /// Consumes self and returns `Some(T)` if the loader state is 'Loaded'. Returns `None` otherwise.
+    pub fn take(&mut self) -> Option<T> {
+        self.state.take()
+    }
+    
     pub fn content(&self) -> Option<&T> {
         match &self.state {
             LoaderState::Loaded(content) => Some(content),

@@ -20,34 +20,45 @@ use crate::documents::loader::DocumentContent;
 pub struct ImageDocument {
     pub path: PathBuf,
 
-    loader: DocumentContent<TextureHandle, ImageLoaderError>,
+    loader: DocumentContent<(Url, TextureHandle), ImageLoaderError>,
+    context: Context,
 }
 
 enum ImageLoaderError {
     Error
 }
 
+impl Drop for ImageDocument {
+    fn drop(&mut self) {
+        self.forget_existing_image()
+    }
+}
+
 impl ImageDocument {
     pub fn create_new(path: PathBuf, ctx: &Context) -> Self {
+
+        let url = Url::from_file_path(path.clone()).unwrap();
+        info!("creating image. uri: {}", url);
 
         let image_data: ImageData = ImageData::Color(Arc::new(ColorImage::new([100, 100], Color32::RED)));
 
         let texture_handle = ctx.load_texture(
-            path.to_str().unwrap(),
+            url.as_str(),
             image_data,
             Default::default()
         );
 
         Self {
             path,
-            loader: DocumentContent::new(texture_handle),
+            context: ctx.clone(),
+            loader: DocumentContent::new((url, texture_handle)),
         }
     }
 
     pub fn from_path(path: PathBuf, ctx: &Context, document_key: DocumentKey, sender: AppMessageSender) -> Self {
         let message = (MessageSource::Document(document_key), AppMessage::Refresh);
         let loader = DocumentContent::load(path.clone(), ctx, message, sender, move |path, ctx| {
-            fn load_image_from_file_using_image_crate(ctx: &Context, path: &Path) -> Option<TextureHandle> {
+            fn load_image_from_file_using_image_crate(ctx: &Context, path: PathBuf, url: Url) -> Option<(Url, TextureHandle)> {
                 // Open and decode the image
                 let img = ImageReader::open(path).ok()?.decode().ok()?;
                 let size = img.dimensions();
@@ -59,15 +70,12 @@ impl ImageDocument {
                 // Create an egui ColorImage
                 let color_image = egui::ColorImage::from_rgba_unmultiplied([size.0 as usize, size.1 as usize], pixels.as_slice());
 
-                // Load the texture into egui
-                Some(ctx.load_texture("loaded_image", color_image, TextureOptions::default()))
+                // Load the texture into egui, we use the url, so we can forget it later, forgetting an image requires a url, not a path...
+                let texture_handle = ctx.load_texture(url.as_str(), color_image, TextureOptions::default());
+                    
+                Some((url, texture_handle))
             }
-            fn load_image_from_file_using_egui_extras(ctx: &Context, path: &Path) -> Option<TextureHandle> {
-                // Attempt to load the image
-                let url = Url::from_file_path(path).unwrap();
-                info!("uri: {}", url);
-            
-            
+            fn load_image_from_file_using_egui_extras(ctx: &Context, _path: PathBuf, url: Url) -> Option<(Url, TextureHandle)> {
                 let texture = loop {
                     let poll = ctx.try_load_texture(url.as_str(), TextureOptions::default(), SizeHint::default()).ok()?;
                     match poll {
@@ -81,19 +89,25 @@ impl ImageDocument {
                         }
                     }
                 };
-                
-                Some(TextureHandle::new(ctx.tex_manager(), texture.id))
+
+                // very important that the id is given to the texture manager to prevent double-free/use-after-free panics.
+                ctx.tex_manager().write().retain(texture.id);
+                let texture_handle = TextureHandle::new(ctx.tex_manager(), texture.id);
+                Some((url, texture_handle))
             }
 
-            //let result = load_image_from_file_using_image_crate(ctx, path.as_path());
-            let result = load_image_from_file_using_egui_extras(ctx, path.as_path());
+            let url = Url::from_file_path(path.clone()).unwrap();
+            info!("uri: {}", url);
+
+            //let result = load_image_from_file_using_image_crate(ctx, path, url);
+            let result = load_image_from_file_using_egui_extras(ctx, path, url);
             match result {
                 None => {
                     error!("Failed to load image");
                     Err(ImageLoaderError::Error)
                 }
                 Some(result) => {
-                    info!("Image loaded. texture_id: {:?}", result.id());
+                    info!("Image loaded. texture_id: {:?}", result.1.id());
                     Ok(result)
                 }
             }
@@ -102,6 +116,16 @@ impl ImageDocument {
         Self {
             path,
             loader,
+            context: ctx.clone(),
+        }
+    }
+
+    fn forget_existing_image(&mut self) {
+        if let Some((uri, _existing_texture)) = self.loader.take() {
+            debug!("forgetting existing image. uri: {}", uri);
+            
+            // forget the image so that the image is loaded from disk again.
+            self.context.forget_image(uri.as_str());
         }
     }
 
@@ -187,7 +211,7 @@ impl ImageDocument {
         if self.loader.is_error() {
             ui.label(tr!("file-loading-error"));
         } else {
-            if let Some(texture_handle) = self.loader.content_mut() {
+            if let Some((url, texture_handle)) = self.loader.content_mut() {
                 egui::Frame::new().show(ui, |ui| {
                     let image_source = ImageSource::Texture(SizedTexture::from_handle(&texture_handle));
                     let image = Image::new(image_source);

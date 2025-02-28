@@ -105,7 +105,7 @@ impl ImageDocument {
         }
     }
 
-    pub fn ui<'a>(&mut self, ui: &mut Ui, _context: &mut DocumentContext<'a>) {
+    pub fn ui<'a>(&mut self, ui: &mut Ui, _context: &mut DocumentContext) {
         self.loader.update();
 
         ui.ctx().style_mut(|style| {

@@ -2,7 +2,7 @@ use crate::app::app_tabs::document::DocumentTab;
 use crate::app::app_tabs::home::HomeTab;
 use crate::app::app_tabs::new::NewTab;
 use crate::app::tabs::{Tab, TabKey};
-use crate::context::Context;
+use crate::context::TabContext;
 use egui::{Ui, WidgetText};
 use serde::{Deserialize, Serialize};
 
@@ -17,7 +17,9 @@ pub enum TabKind {
     New(NewTab),
 }
 
-impl<'a> Tab<Context<'a>> for TabKind {
+impl Tab for TabKind {
+    type Context = TabContext;
+
     fn label(&self) -> WidgetText {
         match self {
             TabKind::Home(tab) => tab.label(),
@@ -26,7 +28,7 @@ impl<'a> Tab<Context<'a>> for TabKind {
         }
     }
 
-    fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, context: &mut Context<'a>) {
+    fn ui(&mut self, ui: &mut Ui, tab_key: &TabKey, context: &mut TabContext) {
         match self {
             TabKind::Home(tab) => tab.ui(ui, tab_key, context),
             TabKind::Document(tab) => tab.ui(ui, tab_key, context),
@@ -34,7 +36,7 @@ impl<'a> Tab<Context<'a>> for TabKind {
         }
     }
 
-    fn on_close(&mut self, tab_key: &mut TabKey, context: &mut Context<'a>) -> bool {
+    fn on_close(&mut self, tab_key: &TabKey, context: &mut TabContext) -> bool {
         match self {
             TabKind::Home(tab) => tab.on_close(tab_key, context),
             TabKind::Document(tab) => tab.on_close(tab_key, context),

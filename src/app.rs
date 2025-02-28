@@ -3,7 +3,7 @@ use crate::app::app_tabs::home::HomeTab;
 use crate::app::app_tabs::new::{KindChoice, NewTab};
 use crate::app::app_tabs::TabKind;
 use crate::app::tabs::{AppTabViewer, TabKey, Tabs};
-use crate::context::Context;
+use crate::context::TabContext;
 use crate::documents::image::ImageDocument;
 use crate::documents::text::TextDocument;
 use crate::documents::{DocumentKey, DocumentKind};
@@ -32,10 +32,10 @@ mod tabs;
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
 pub struct TemplateApp {
-    tabs: Tabs,
+    tabs: Tabs<TabKind, TabContext>,
     tree: DockState<TabKey>,
 
-    config: Config,
+    config: Arc<Mutex<Config>>,
 
     // state contains fields that cannot be initialized using 'Default'
     #[serde(skip)]
@@ -87,7 +87,7 @@ impl Default for Config {
 
 impl Default for TemplateApp {
     fn default() -> Self {
-        let config = Config::default();
+        let config = Default::default();
 
         let mut tabs = Tabs::new();
 
@@ -264,7 +264,7 @@ impl TemplateApp {
 
     /// Safety: call only once on startup, before the tabs are shown.
     fn show_home_tab_on_startup(&mut self) {
-        if self.config.show_home_tab_on_startup {
+        if self.config.lock().unwrap().show_home_tab_on_startup {
             self.show_home_tab();
         } else {
             if let Some(home_tab_key) = self.find_home_tab() {
@@ -277,7 +277,7 @@ impl TemplateApp {
     /// Due to bugs in egui_dock where it doesn't call `on_close` when closing tabs, it's possible that the tabs
     /// and the dock tree are out of sync.  `on_close` should be removing elements from `self.tabs` corresponding to the
     /// tab being closed, but because it is not called there can be orphaned elements, we need to find and remove them.
-    pub fn cleanup_tabs(&mut self) {
+    pub fn cleanup_tabs(&mut self, context: &mut TabContext) {
         let known_tab_keys = self
             .tree
             .iter_all_tabs()
@@ -287,7 +287,7 @@ impl TemplateApp {
         // FIXME this doesn't close the documents corresponding to orphaned tabs.
         //       we need to call `on_close` for each closed tab manually.
         
-        self.tabs.retain_all(&known_tab_keys);
+        self.tabs.retain_all(&known_tab_keys, context);
     }
 
     /// when the app starts up, the documents will be empty, and the document tabs will have keys that don't exist
@@ -437,18 +437,20 @@ impl eframe::App for TemplateApp {
             self.restore_documents_on_startup(ctx);
         }
 
-        // FIXME remove this when `on_close` bugs in egui_dock are fixed.
-        self.cleanup_tabs();
 
         // TODO discover whether cloning a sender is expensive or not
         let sender = self.state().sender.clone();
         let documents = self.state().documents.clone();
+        let config = self.config.clone();
 
-        let mut context = Context {
-            config: &mut self.config,
+        let mut context = TabContext {
+            config,
             sender,
             documents,
         };
+
+        // FIXME remove this when `on_close` bugs in egui_dock are fixed.
+        self.cleanup_tabs(&mut context);
 
         let mut my_tab_viewer = AppTabViewer {
             tabs: &mut self.tabs,

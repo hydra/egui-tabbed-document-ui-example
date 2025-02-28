@@ -11,7 +11,7 @@ use validator::{Validate, ValidationErrors};
 // FIXME dependency on AppMessage and AppMessageSender here seems wrong.
 //       Feels like App should depend on new tab, new tab should not depend on App.
 use crate::app::{AppMessage, AppMessageSender, DocumentArgs, MessageSource};
-use crate::context::Context;
+use crate::context::TabContext;
 use crate::file_picker::Picker;
 use crate::i18n::fluent_argument_helpers;
 
@@ -48,12 +48,14 @@ struct NewTabForm {
     directory: Option<PathBuf>,
 }
 
-impl<'a> Tab<Context<'a>> for NewTab {
+impl Tab for NewTab {
+    type Context = TabContext;
+
     fn label(&self) -> WidgetText {
         egui::widget_text::WidgetText::from("New")
     }
 
-    fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, _context: &mut Context<'a>) {
+    fn ui(&mut self, ui: &mut Ui, tab_key: &TabKey, _context: &mut Self::Context) {
         if let Ok(picked_directory) = self.file_picker.picked() {
             self.fields.directory = Some(picked_directory);
         }

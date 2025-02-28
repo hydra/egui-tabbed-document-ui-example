@@ -4,8 +4,8 @@ use egui_inbox::UiInboxSender;
 use slotmap::SlotMap;
 use std::sync::{Arc, Mutex};
 
-pub struct Context<'a> {
-    pub config: &'a mut Config,
+pub struct TabContext {
+    pub config:Arc<Mutex<Config>>,
     pub sender: UiInboxSender<(MessageSource, AppMessage)>,
     pub documents: Arc<Mutex<SlotMap<DocumentKey, DocumentKind>>>,
 }

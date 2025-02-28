@@ -1,23 +1,25 @@
 use crate::app::app_tabs::TabKind;
-use crate::context::Context;
+use crate::context::TabContext;
 use egui::{Id, Ui, WidgetText};
 use egui_dock::TabViewer;
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 use std::collections::btree_map::{Iter, IterMut};
 use std::collections::BTreeMap;
+use std::marker::PhantomData;
 
 #[derive(Debug, Clone, Hash, Copy, Ord, Eq, PartialOrd, PartialEq, Serialize, Deserialize)]
 pub struct TabKey(usize);
 
-#[derive(Serialize, Deserialize)]
-pub struct Tabs {
+#[derive(Serialize, Deserialize, Default)]
+pub struct Tabs<TabKind, Context> {
     next_id: usize,
     tabs: BTreeMap<TabKey, TabKind>,
+    _phantom: PhantomData<Context>,
 }
 
 #[allow(dead_code)]
-impl Tabs {
+impl<Context, TabKind: Tab<Context = Context>> Tabs<TabKind, Context> {
     fn next_key(&mut self) -> TabKey {
         loop {
             self.next_id = self.next_id.wrapping_add(1);
@@ -43,10 +45,11 @@ impl Tabs {
         self.tabs.get_mut(key)
     }
 
-    pub fn new() -> Tabs {
+    pub fn new() -> Self {
         Self {
             next_id: 0,
             tabs: BTreeMap::default(),
+            _phantom: Default::default(),
         }
     }
 
@@ -58,27 +61,34 @@ impl Tabs {
         self.tabs.iter_mut()
     }
 
-    pub fn retain_all(&mut self, tab_keys: &[TabKey]) {
-        self.tabs.retain(|tab_key, _| {
-            let retain = tab_keys.contains(tab_key);
-
+    pub fn retain_all(&mut self, tab_keys: &[TabKey], tab_context: &mut Context) {
+        self.tabs.retain(|tab_key, tab| {
+            let mut retain = tab_keys.contains(tab_key);
+            
             if !retain {
-                info!("Removing orphaned tab. key: {:?}", tab_key);
+                let can_close = tab.on_close(tab_key, tab_context);
+
+                if can_close {
+                    info!("Removing orphaned tab. key: {:?}", tab_key);
+                }
             }
             retain
         });
     }
 }
 
-impl Tabs {
+impl<TabKind, TabContext> Tabs<TabKind, TabContext> {
     pub fn ids(&self) -> Vec<TabKey> {
         self.tabs.keys().cloned().collect()
     }
 }
 
-pub trait Tab<App> {
+pub trait Tab {
+    
+    type Context;
+    
     fn label(&self) -> WidgetText;
-    fn ui(&mut self, ui: &mut Ui, tab_key: &mut TabKey, app: &mut App);
+    fn ui<'a>(&mut self, ui: &mut Ui, tab_key: &TabKey, app: &mut Self::Context);
 
     // handle a tab being closed
     // this is where any per-tab clean-up code should be performed
@@ -86,17 +96,17 @@ pub trait Tab<App> {
     // return 'true' to allow the tab to be closed, 'false' to prevent closing.
     // FIXME due to bugs in egui_dock, this is not always called, see related FIXMEs in the codebase
     //       do NOT rely on this method for now, workarounds are required.
-    fn on_close(&mut self, _tab_key: &mut TabKey, _app: &mut App) -> bool {
+    fn on_close<'a>(&mut self, _tab_key: &TabKey, _app: &mut Self::Context) -> bool {
         true
     }
 }
 
-pub struct AppTabViewer<'a> {
-    pub tabs: &'a mut Tabs,
-    pub context: &'a mut Context<'a>,
+pub struct AppTabViewer<'a, TabContext, TabKind: Tab> {
+    pub tabs: &'a mut Tabs<TabKind, TabContext>,
+    pub context: &'a mut TabContext,
 }
 
-impl<'a> TabViewer for AppTabViewer<'a> {
+impl<'a, TabContext, TabKind: Tab<Context = TabContext>> TabViewer for AppTabViewer<'a, TabContext, TabKind> {
     type Tab = TabKey;
 
     fn id(&mut self, tab: &mut Self::Tab) -> Id {

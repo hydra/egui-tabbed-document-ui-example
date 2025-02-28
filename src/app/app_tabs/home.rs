@@ -1,7 +1,7 @@
 use crate::app::tabs::{Tab, TabKey};
 use egui::{Checkbox, FontFamily, RichText, Ui, WidgetText};
 //use egui_flex::{item, Flex, FlexAlign, FlexDirection, FlexItem, FlexJustify};
-use crate::context::Context;
+use crate::context::TabContext;
 use egui_i18n::tr;
 use egui_material_icons::icons::ICON_HOME;
 use egui_taffy::taffy::prelude::{length, percent};
@@ -14,12 +14,14 @@ pub struct HomeTab {
     show_on_startup: bool,
 }
 
-impl<'a> Tab<Context<'a>> for HomeTab {
+impl Tab for HomeTab {
+    type Context = TabContext;
+
     fn label(&self) -> WidgetText {
         egui::widget_text::WidgetText::from(tr!("home-tab-label"))
     }
 
-    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context<'a>) {
+    fn ui(&mut self, ui: &mut Ui, _tab_key: &TabKey, context: &mut Self::Context) {
         ui.ctx().style_mut(|style| {
             // if this is not done, text in labels/checkboxes/etc wraps
             style.wrap_mode = Some(egui::TextWrapMode::Extend);
@@ -64,7 +66,7 @@ impl<'a> Tab<Context<'a>> for HomeTab {
 
                 tui.ui(|ui| {
                     ui.add(Checkbox::new(
-                        &mut context.config.show_home_tab_on_startup,
+                        &mut context.config.lock().unwrap().show_home_tab_on_startup,
                         tr!("home-tab-show-on-startup"),
                     ));
                 });

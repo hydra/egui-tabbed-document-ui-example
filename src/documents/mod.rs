@@ -1,3 +1,4 @@
+use std::sync::{Arc, Mutex};
 use crate::app::{AppMessage, Config, MessageSource};
 use crate::documents::image::ImageDocument;
 use crate::documents::text::TextDocument;
@@ -19,8 +20,8 @@ pub enum DocumentKind {
     ImageDocument(ImageDocument),
 }
 
-pub struct DocumentContext<'a> {
-    pub config: &'a mut Config,
+pub struct DocumentContext {
+    pub config: Arc<Mutex<Config>>,
     pub sender: UiInboxSender<(MessageSource, AppMessage)>,
 }
 

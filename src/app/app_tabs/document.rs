@@ -1,5 +1,5 @@
 use crate::app::tabs::{Tab, TabKey};
-use crate::context::Context;
+use crate::context::TabContext;
 use crate::documents::{DocumentContext, DocumentKey, DocumentKind};
 use egui::{Ui, WidgetText};
 use log::debug;
@@ -13,12 +13,14 @@ pub struct DocumentTab {
     pub document_key: DocumentKey,
 }
 
-impl<'a> Tab<Context<'a>> for DocumentTab {
+impl Tab for DocumentTab {
+    type Context = TabContext;
+
     fn label(&self) -> WidgetText {
         egui::widget_text::WidgetText::from(self.title.clone())
     }
 
-    fn ui(&mut self, ui: &mut Ui, _tab_key: &mut TabKey, context: &mut Context<'a>) {
+    fn ui(&mut self, ui: &mut Ui, _tab_key: &TabKey, context: &mut Self::Context) {
         // get the document, this will fail if the document has not been restored on application startup.
         let mut documents_guard = context.documents.lock().unwrap();
         let document_kind = documents_guard.get_mut(self.document_key).unwrap();
@@ -27,7 +29,7 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
         // Note: we can't pass the context, as it's already mutably borrowed.
 
         let mut document_context = DocumentContext {
-            config: context.config,
+            config: context.config.clone(),
             sender: context.sender.clone(),
         };
 
@@ -39,7 +41,7 @@ impl<'a> Tab<Context<'a>> for DocumentTab {
         }
     }
 
-    fn on_close(&mut self, _tab_key: &mut TabKey, app: &mut Context<'a>) -> bool {
+    fn on_close(&mut self, _tab_key: &TabKey, app: &mut TabContext) -> bool {
         debug!("removing document. key: {:?}", self.document_key);
         app.documents.lock().unwrap().remove(self.document_key);
 

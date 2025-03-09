@@ -35,7 +35,6 @@ pub enum KindChoice {
     Image,
 }
 
-// FIXME form errors do not use i18n
 #[derive(Clone, Debug, Default, Validate, Deserialize, Serialize)]
 struct NewTabForm {
     #[validate(length(min = 1, code = "form-new-name-error-length"))]

@@ -1,7 +1,6 @@
-use crate::app::app_tabs::TabKind;
-use crate::context::TabContext;
 use egui::{Id, Ui, WidgetText};
 use egui_dock::TabViewer;
+use egui_dock::tab_viewer::OnCloseResponse;
 use log::{debug, info};
 use serde::{Deserialize, Serialize};
 use std::collections::btree_map::{Iter, IterMut};
@@ -63,12 +62,12 @@ impl<Context, TabKind: Tab<Context = Context>> Tabs<TabKind, Context> {
 
     pub fn retain_all(&mut self, tab_keys: &[TabKey], tab_context: &mut Context) {
         self.tabs.retain(|tab_key, tab| {
-            let mut retain = tab_keys.contains(tab_key);
+            let retain = tab_keys.contains(tab_key);
             
             if !retain {
-                let can_close = tab.on_close(tab_key, tab_context);
+                let close_response = tab.on_close(tab_key, tab_context);
 
-                if can_close {
+                if matches!(close_response, OnCloseResponse::Close) {
                     info!("Removing orphaned tab. key: {:?}", tab_key);
                 }
             }
@@ -96,8 +95,8 @@ pub trait Tab {
     // return 'true' to allow the tab to be closed, 'false' to prevent closing.
     // FIXME due to bugs in egui_dock, this is not always called, see related FIXMEs in the codebase
     //       do NOT rely on this method for now, workarounds are required.
-    fn on_close<'a>(&mut self, _tab_key: &TabKey, _app: &mut Self::Context) -> bool {
-        true
+    fn on_close<'a>(&mut self, _tab_key: &TabKey, _app: &mut Self::Context) -> OnCloseResponse {
+        OnCloseResponse::Close
     }
 }
 
@@ -125,17 +124,22 @@ impl<'a, TabContext, TabKind: Tab<Context = TabContext>> TabViewer for AppTabVie
         }
     }
 
-    fn on_close(&mut self, tab: &mut Self::Tab) -> bool {
+    fn on_close(&mut self, tab: &mut Self::Tab) -> OnCloseResponse {
         // FIXME this isn't called when the 'close all' button in the tab bar is used.
         //       reported to maintainer - https://discord.com/channels/900275882684477440/1075333382290026567/1339624259697246348
         debug!("closing tab, id: {:?}", tab);
 
         let tab_instance = self.tabs.tabs.get_mut(tab).unwrap();
-        let allow_close = tab_instance.on_close(tab, self.context);
-        if allow_close {
+        let close_response = tab_instance.on_close(tab, self.context);
+        if matches!(close_response, OnCloseResponse::Close) {
             let _removed = self.tabs.tabs.remove(tab);
         }
-
-        allow_close
+        close_response
+        // let allow_close = tab_instance.on_close(tab, self.context);
+        // if allow_close {
+        //     let _removed = self.tabs.tabs.remove(tab);
+        // }
+        //
+        // allow_close
     }
 }

@@ -1,6 +1,6 @@
 use crate::documents::{DocumentContext, DocumentKey};
 use egui::{frame, Color32, ColorImage, Context, Image, ImageData, ImageSource, SizeHint, TextureHandle, TextureOptions, Ui};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
@@ -40,7 +40,7 @@ impl ImageDocument {
         let url = Url::from_file_path(path.clone()).unwrap();
         info!("creating image. uri: {}", url);
 
-        let image_data: ImageData = ImageData::Color(Arc::new(ColorImage::new([100, 100], Color32::RED)));
+        let image_data: ImageData = ImageData::Color(Arc::new(ColorImage::filled([100, 100], Color32::RED)));
 
         let texture_handle = ctx.load_texture(
             url.as_str(),
@@ -211,7 +211,7 @@ impl ImageDocument {
         if self.loader.is_error() {
             ui.label(tr!("file-loading-error"));
         } else {
-            if let Some((url, texture_handle)) = self.loader.content_mut() {
+            if let Some((_url, texture_handle)) = self.loader.content_mut() {
                 egui::Frame::new().show(ui, |ui| {
                     let image_source = ImageSource::Texture(SizedTexture::from_handle(&texture_handle));
                     let image = Image::new(image_source);

@@ -227,7 +227,7 @@ impl Tab for NewTab {
                                             })
                                             .show_ui(ui, |ui| {
                                                 if ui
-                                                    .add(egui::SelectableLabel::new(
+                                                    .add(egui::Button::selectable(
                                                         self.fields.kind == Some(KindChoice::Image),
                                                         tr!("form-new-kind-image"),
                                                     ))
@@ -236,7 +236,7 @@ impl Tab for NewTab {
                                                     self.fields.kind = Some(KindChoice::Image)
                                                 }
                                                 if ui
-                                                    .add(egui::SelectableLabel::new(
+                                                    .add(egui::Button::selectable(
                                                         self.fields.kind == Some(KindChoice::Text),
                                                         tr!("form-new-kind-text"),
                                                     ))

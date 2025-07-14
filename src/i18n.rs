@@ -8,8 +8,8 @@ pub fn init() {
 
 pub mod fluent_argument_helpers {
     use egui::TextBuffer;
-    use fluent_bundle::types::{FluentNumber, FluentNumberOptions};
-    use fluent_bundle::{FluentArgs, FluentValue};
+    use egui_i18n::fluent_bundle::types::{FluentNumber, FluentNumberOptions};
+    use egui_i18n::fluent_bundle::{FluentArgs, FluentValue};
     use log::trace;
     use serde_json::Value;
     use std::borrow::Cow;

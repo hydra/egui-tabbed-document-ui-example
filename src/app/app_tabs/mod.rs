@@ -4,6 +4,7 @@ use crate::app::app_tabs::new::NewTab;
 use crate::app::tabs::{Tab, TabKey};
 use crate::context::TabContext;
 use egui::{Ui, WidgetText};
+use egui_dock::tab_viewer::OnCloseResponse;
 use serde::{Deserialize, Serialize};
 
 pub mod document;
@@ -36,7 +37,7 @@ impl Tab for TabKind {
         }
     }
 
-    fn on_close(&mut self, tab_key: &TabKey, context: &mut TabContext) -> bool {
+    fn on_close(&mut self, tab_key: &TabKey, context: &mut TabContext) -> OnCloseResponse {
         match self {
             TabKind::Home(tab) => tab.on_close(tab_key, context),
             TabKind::Document(tab) => tab.on_close(tab_key, context),

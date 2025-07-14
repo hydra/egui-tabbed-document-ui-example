@@ -4,15 +4,15 @@ version = "0.1.0"
 authors = ["Dominic Clifton <me@dominicclifton.name>"]
 edition = "2021"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "**/*.rs", "Cargo.toml"]
-rust-version = "1.81"
+rust-version = "1.85"
 
 [package.metadata.docs.rs]
 all-features = true
 targets = ["x86_64-unknown-linux-gnu", "wasm32-unknown-unknown"]
 
 [dependencies]
-egui = "0.31.0"
-eframe = { version = "0.31.0", default-features = false, features = [
+egui = "0.32.0"
+eframe = { version = "0.32.0", default-features = false, features = [
     "accesskit",     # Make egui compatible with screen readers. NOTE: adds a lot of dependencies.
     "default_fonts", # Embed the default egui fonts.
     "glow",          # Use the glow rendering backend. Alternative: "wgpu".
@@ -21,22 +21,23 @@ eframe = { version = "0.31.0", default-features = false, features = [
 ] }
 
 # latest version may be ok, but this version works
-egui-i18n = { git = "https://github.com/fewensa/egui-i18n", rev = "3be4d89e6328d545a715529ac80415f49d675756", features = ["fluent"] }
+egui-i18n = { git = "https://github.com/makerpnp/egui-i18n", rev = "087c62591d8027b51641bf4bcf556106d17ea799", features = ["fluent"] }
 
 # 0.16 supports egui 0.31
-egui_dock = { version = "0.16.0", features = ["serde"]}
-egui_inbox = "0.8.0"
-egui_extras = { version = "0.31.0", features = ["image", "file", "all_loaders"] }
+egui_dock = { version = "0.17.0", features = ["serde"]}
+egui_inbox = "0.9.0"
+egui_extras = { version = "0.32.0", features = ["image", "file", "all_loaders"] }
 
-egui_material_icons = { git = "https://github.com/lucasmerlin/hello_egui.git", tag = "hello_egui-v0.8.0" }
+egui_material_icons = { git = "https://github.com/lucasmerlin/hello_egui.git", tag = "hello_egui-v0.9.0" }
 
 #egui_flex = { path = "../hello_egui/crates/egui_flex" }
 #egui_form = { path = "../hello_egui/crates/egui_form", features = ["validator_garde"] }
 
 validator = { version = "0.20.0", features = ["derive"] }
-fluent = "0.16"
-fluent-bundle = "0.15.3"
-egui_taffy = "0.7.0"
+#fluent = "0.17"
+#fluent-bundle = "0.15.3"
+#egui_taffy = "0.7.0"
+egui_taffy = { git = "https://github.com/makerpnp/egui_taffy", rev = "c14e390c1f3cd6487968c5845ea205a38c6afbe2" }
 rfd = "0.15.2"
 
 slotmap = { version = "1.0.7", features = ["serde"] }
@@ -77,3 +78,6 @@ opt-level = 2
 # If you fork https://github.com/emilk/egui you can test with:
 # egui = { path = "../egui/crates/egui" }
 # eframe = { path = "../egui/crates/eframe" }
+
+# Taffy improvements that have not been released yet
+taffy = { git = "https://github.com/PPakalns/taffy", rev = "430ea480cb07e2a264f2edb374bd05c75f1b76e3" }

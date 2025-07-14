@@ -5,6 +5,7 @@ use egui::{Ui, WidgetText};
 use log::debug;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
+use egui_dock::tab_viewer::OnCloseResponse;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct DocumentTab {
@@ -41,11 +42,11 @@ impl Tab for DocumentTab {
         }
     }
 
-    fn on_close(&mut self, _tab_key: &TabKey, app: &mut TabContext) -> bool {
+    fn on_close(&mut self, _tab_key: &TabKey, app: &mut TabContext) -> OnCloseResponse {
         debug!("removing document. key: {:?}", self.document_key);
         app.documents.lock().unwrap().remove(self.document_key);
 
-        true
+        OnCloseResponse::Close
     }
 }
 
